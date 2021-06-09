@@ -94,7 +94,8 @@ transition probability matrix}
 }
 }
 \examples{
-lphom(France2017P[, 1:8] , France2017P[, 9:12], new_and_exit_voters= "raw", verbose = FALSE)
+lphom(France2017P[, 1:8] , France2017P[, 9:12], new_and_exit_voters= "raw", 
+      structural_zeros = NULL, verbose = FALSE)
 }
 \references{
 Romero, R, Pavia, JM, Martin, J and Romero G (2020). Assessing uncertainty of voter transitions estimated from aggregated data. Application to the 2017 French presidential election. \emph{Journal of Applied Statistics}, 47(13-15), 2711-2736. \doi{10.1080/02664763.2020.1804842}

@@ -40,10 +40,9 @@ Estimation of the error index (EI) of a RxC vote transfer matrix obtained with \
 ggplot2 is needed to be installed for this function to work.
 }
 \examples{
-mt.lphom <- lphom(France2017P[, 1:8] , France2017P[, 9:12], new_and_exit_voters= "raw",
-                  verbose = FALSE)
+mt.lphom <- lphom(France2017P[, 1:8], France2017P[, 9:12], "raw", NULL, FALSE)
 set.seed(253443)
-example <- error_lphom(mt.lphom, show.plot = FALSE, num.d = 5, B = 8)
+example <- error_lphom(mt.lphom, upper.alfa = 0.10, show.plot = FALSE, num.d = 5, B = 8)
 example$EI.estimate
 }
 \references{

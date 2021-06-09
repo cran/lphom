@@ -26,10 +26,9 @@ A list with the following components
 Estimates confidence intervals for the (vote) transfer probabilities obtained with \strong{lphom()}
 }
 \examples{
-mt.lphom <- lphom(France2017P[, 1:8] , France2017P[, 9:12], new_and_exit_voters= "raw",
-                  verbose = FALSE)
+mt.lphom <- lphom(France2017P[, 1:8], France2017P[, 9:12], "raw", NULL, FALSE)
 set.seed(533423)
-confidence_intervals_pjk(mt.lphom, num.d = 5, B = 8)
+confidence_intervals_pjk(mt.lphom, level = 0.90, num.d = 5, B = 8)
 }
 \references{
 Romero, R, Pavia, JM, Martin, J and Romero G (2020). Assessing uncertainty of voter transitions estimated from aggregated data. Application to the 2017 French presidential election. \emph{Journal of Applied Statistics}, 47(13-15), 2711-2736. \doi{10.1080/02664763.2020.1804842}

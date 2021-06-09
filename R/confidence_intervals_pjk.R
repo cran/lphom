@@ -24,10 +24,9 @@
 #' @seealso \code{\link{lphom}} \code{\link{error_lphom}}
 #'
 #' @examples
-#' mt.lphom <- lphom(France2017P[, 1:8] , France2017P[, 9:12], new_and_exit_voters= "raw",
-#'                   verbose = FALSE)
+#' mt.lphom <- lphom(France2017P[, 1:8], France2017P[, 9:12], "raw", NULL, FALSE)
 #' set.seed(533423)
-#' confidence_intervals_pjk(mt.lphom, num.d = 5, B = 8)
+#' confidence_intervals_pjk(mt.lphom, level = 0.90, num.d = 5, B = 8)
 #
 # @importFrom stats qnorm
 #
@@ -68,9 +67,9 @@ confidence_intervals_pjk <- function(lphom.object,
         sesgos <- simular_errores_estimacion_pjk(escenarios, j, k)
         ses.var <- modelos_ajuste_estimacion_pjk(sesgos, lphom.object$HETe)
         li <- ses.var[1] + zeta*ses.var[2]
-        MT.upper[j,k] <- min(1, lphom.object$VTM.complete[j,k] - li)
+        MT.upper[j,k] <- max(min(1, lphom.object$VTM.complete[j,k] - li), lphom.object$VTM.complete[j,k])
         ls <- ses.var[1] - zeta*ses.var[2]
-        MT.lower[j,k] <- max(0, lphom.object$VTM.complete[j,k] - ls)
+        MT.lower[j,k] <- min(max(0, lphom.object$VTM.complete[j,k] - ls), lphom.object$VTM.complete[j,k])
       }
     }
   }

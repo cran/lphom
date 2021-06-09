@@ -39,7 +39,7 @@ entries are computed because the sum by rows of \code{votes_election1} and
 \code{votes_election2} does not coincide.}
 
 \item{uniform}{A TRUE/FALSE value that indicates if census exits affects all the electoral options in a
-(relatively) similar fashion in each voting unit: equation (13) of Pavia and Romero (2020).
+(relatively) similar fashion in each voting unit: equation (13) of Pavia and Romero (2021).
 Default, TRUE.}
 
 \item{distance.local}{A string argument that indicates whether the second step of the lphom_local algorithm
@@ -58,7 +58,7 @@ printed on the screen. Default, FALSE.}
 A list with the following components
 \item{VTM}{ A matrix of order JxK with the estimated percentages of vote transitions from election 1 to election 2.}
 \item{OTM}{ A matrix of order KxJ with the estimated percentages of the origin of the votes obtained for the different options of election 2.}
-\item{HETe}{ The estimated heterogeneity index as defined in equation (15) of Pavia and Romero (2020).}
+\item{HETe}{ The estimated heterogeneity index as defined in equation (15) of Pavia and Romero (2021).}
 \item{VTM.complete}{ A matrix of order J'xK' with the estimated proportions of vote transitions from election 1 to election 2, including in \code{regular} and \code{raw} scenarios the row and the column corresponding to net_entries and net_exits even when they are really small, less than 1\% in all units.}
 \item{VTM_units}{ An array of order J'xK'xI with the estimated proportions of vote transitions from election 1 to election 2 attained for each unit after adjusting the \strong{lphom()} initial estimate.}
 \item{VTM_votes}{ An array of order J'xK'xI with the estimated matrix of vote transitions from election 1 to election 2 attained for each unit after adjusting the \strong{lphom()} initial estimate.}

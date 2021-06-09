@@ -89,7 +89,8 @@
 #' @seealso \code{\link{tslphom}} \code{\link{nslphom}}
 #'
 #' @examples
-#' lphom(France2017P[, 1:8] , France2017P[, 9:12], new_and_exit_voters= "raw", verbose = FALSE)
+#' lphom(France2017P[, 1:8] , France2017P[, 9:12], new_and_exit_voters= "raw", 
+#'       structural_zeros = NULL, verbose = FALSE)
 #
 #' @importFrom lpSolve lp
 #

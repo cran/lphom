@@ -53,7 +53,7 @@ is taken as solution. The process stops at that moment. In this last scenario
 (when \code{min.first = TRUE}), \code{burnin = 0} is forced and \code{iter.max} is at least 100. Default, FALSE.}
 
 \item{uniform}{A TRUE/FALSE value that indicates if census exits affects all the electoral options in a
-(relatively) similar fashion in each voting unit: equation (13) of Pavia and Romero (2020).
+(relatively) similar fashion in each voting unit: equation (13) of Pavia and Romero (2021).
 Default, TRUE.}
 
 \item{distance.local}{A string argument that indicates whether the second step of the lphom_local algorithm
@@ -78,7 +78,7 @@ iterations is less than \code{tol} or the maximum number of iterations has been 
 A list with the following components
 \item{VTM}{ A matrix of order JxK with the estimated percentages of vote transitions from election 1 to election 2.}
 \item{OTM}{ A matrix of order KxJ with the estimated percentages of the origin of the votes obtained for the different options of election 2.}
-\item{HETe}{ The estimated heterogeneity index as defined in equation (15) of Pavia and Romero (2020).}
+\item{HETe}{ The estimated heterogeneity index as defined in equation (15) of Pavia and Romero (2021).}
 \item{VTM.complete}{ A matrix of order J'xK' with the estimated proportions of vote transitions from election 1 to election 2, including in \code{regular} and \code{raw} scenarios the row and the column corresponding to net_entries and net_exits even when they are really small, less than 1\% in all units.}
 \item{VTM.sequence}{ Array of order J'xK'x(iter+1) (where \code{iter} is the efective number of iterations performed) of the estimated matrices corresponding to each iteration.}
 \item{HETe.sequence}{ Numeric vector of length \code{iter+1} with the \code{HETe} coefficients corresponding to the matrices in \code{VTM.sequence}.}

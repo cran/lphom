@@ -230,7 +230,10 @@ modelos_ajuste_estimacion_pjk <- function(matriz.errores, HETe0){
   error <- matriz.errores[, 4]
   ajuste.lineal <- stats::lm(error ~ he + he2 + 0)
   eom <- ajuste.lineal$coef[1]*HETe0 + ajuste.lineal$coef[2]*HETe0^2
-  ajuste.varianza <- stats::lm(ajuste.lineal$residuals^2 ~ he + he2 + 0)
+  resid <- error - ajuste.lineal$coef[1]*he + ajuste.lineal$coef[2]*he2
+  df <- data.frame(resid, he, he2)
+  df <- df[stats::complete.cases(df),]
+  ajuste.varianza <- stats::lm(resid ~ he + he2 + 0, data = df)
   seo <- sqrt(max(ajuste.varianza$coef[1]*HETe0 + ajuste.varianza$coef[2]*HETe0^2, 0))
   output <- c(eom, seo)
   return(output)
