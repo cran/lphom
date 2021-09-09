@@ -42,34 +42,34 @@ confidence_intervals_pjk <- function(lphom.object,
   num.d <- as.integer(num.d); B <- as.integer(B)
   if (num.d < 5) stop('num.d must be a integer greater than 5')
   if (B < 1) stop('B must be a integer greater than 0')
-  num.q <- (num.d + 1)/2
+  num.q <- (num.d + 1L)/2
   d0.ref <- hallar_d0(lphom.object)
-  id = d0.ref[1] + d0.ref[2]*((1:num.d)-num.q)
-  while (id[1] < 0) {
-    d0.ref[2] <- d0.ref[2]/2
-    id = d0.ref[1] + d0.ref[2]*((1:num.d)-num.q)
+  id = d0.ref[1] + d0.ref[2L]*((1L:num.d)-num.q)
+  while (id[1L] < 0) {
+    d0.ref[2L] <- d0.ref[2L]/2
+    id = d0.ref[1L] + d0.ref[2L]*((1L:num.d)-num.q)
   }
-  id <- seq(id[1], id[1] + 0.25, d0.ref[2]) # Expansión de id
+  id <- seq(id[1L], id[1L] + 0.25, d0.ref[2L]) # Expansión de id
   escenarios <- simular_escenarios(lphom.object = lphom.object, M.d = id, B = B)
   J <- nrow(lphom.object$VTM.complete)
   K <- ncol(lphom.object$VTM.complete)
   ceros <- determinar_zeros_estructurales(lphom.object)
   MT.upper <- MT.lower <- array(NA, dim(lphom.object$VTM.complete))
-  zeta <- stats::qnorm((1-level)/2)
+  zeta <- stats::qnorm((1L - level)/2)
   if (!is.null(ceros)){
     for (i in 1:length(ceros)){
-      MT.upper[ceros[[i]][1], ceros[[i]][2]] <- MT.lower[ceros[[i]][1], ceros[[i]][2]] <- 0
+      MT.upper[ceros[[i]][1L], ceros[[i]][2L]] <- MT.lower[ceros[[i]][1L], ceros[[i]][2L]] <- 0L
     }
   }
-  for (j in 1:J){
-    for (k in 1:K){
-      if (is.na(MT.upper[j,k])){
+  for (j in 1L:J){
+    for (k in 1L:K){
+      if (is.na(MT.upper[j, k])){
         sesgos <- simular_errores_estimacion_pjk(escenarios, j, k)
         ses.var <- modelos_ajuste_estimacion_pjk(sesgos, lphom.object$HETe)
-        li <- ses.var[1] + zeta*ses.var[2]
-        MT.upper[j,k] <- max(min(1, lphom.object$VTM.complete[j,k] - li), lphom.object$VTM.complete[j,k])
-        ls <- ses.var[1] - zeta*ses.var[2]
-        MT.lower[j,k] <- min(max(0, lphom.object$VTM.complete[j,k] - ls), lphom.object$VTM.complete[j,k])
+        li <- ses.var[1L] + zeta*ses.var[2L]
+        MT.upper[j,k] <- max(min(1L, lphom.object$VTM.complete[j,k] - li), lphom.object$VTM.complete[j,k])
+        ls <- ses.var[1L] - zeta*ses.var[2L]
+        MT.lower[j,k] <- min(max(0L, lphom.object$VTM.complete[j,k] - ls), lphom.object$VTM.complete[j,k])
       }
     }
   }

@@ -9,7 +9,9 @@ lphom(
   votes_election2,
   new_and_exit_voters = c("regular", "raw", "simultaneous", "full", "gold"),
   structural_zeros = NULL,
-  verbose = FALSE
+  counts = FALSE,
+  verbose = FALSE,
+  solver = "lp_solve"
 )
 }
 \arguments{
@@ -36,19 +38,27 @@ lphom implicitly \verb{states structural_zeros = list(c(J, K))} in case exits an
 entries are computed because the sum by rows of \code{votes_election1} and
 \code{votes_election2} does not coincide.}
 
+\item{counts}{A TRUE/FALSE value that indicates whether the linked LP solution of votes must be approximate
+to the closest integer solution using ILP. Default, FALSE.}
+
 \item{verbose}{A TRUE/FALSE value that indicates if the main outputs of the function should be
 printed on the screen. Default, FALSE.}
+
+\item{solver}{A character string indicating the linear programming solver to be used, only
+\code{lp_solve} and \code{symphony} are allowed. By default, \code{lp_solve}.}
 }
 \value{
 A list with the following components
-\item{VTM}{ A matrix of order JxK with the estimated percentages of vote transitions from election 1 to election 2.}
+\item{VTM}{ A matrix of order JxK with the estimated percentages of row-standardized vote transitions from election 1 to election 2.}
+\item{VTM.votes}{ A matrix of order JxK with the estimated vote transitions from election 1 to election 2.}
 \item{OTM}{ A matrix of order KxJ with the estimated percentages of the origin of the votes obtained for the different options of election 2.}
 \item{HETe}{ The estimated heterogeneity index defined in equation (11) of Romero et al. (2020).}
-\item{EHet}{ A matrix of order IxK measuring in each spatial unit a distance to the homogeneity hypothesis, that is, the differences under the homogeneity hypothesis between the actual recorded results and the expected results in each territorial unit for each option of election two.}
+\item{VTM.complete}{ A matrix of order J'xK' with the estimated proportions of row-standardized vote transitions from election 1 to election 2, including in \code{regular} and \code{raw} scenarios the row and the column corresponding to net_entries and net_exits even when they are really small, less than 1\% in all units.}
+\item{VTM.complete.votes}{ A matrix of order J'xK' with the estimated vote transitions from election 1 to election 2, including in \code{regular} and \code{raw} scenarios the row and the column corresponding to net_entries and net_exits even when they are really small, less than 1\% in all units.}
 \item{inputs}{ A list containing all the objects with the values used as arguments by the function.}
 \item{origin}{ A matrix with the final data used as votes of the origin election after taking into account the level of information available regarding to new entries and exits of the election censuses between the two elections.}
 \item{destination}{ A matrix with the final data used as votes of the origin election after taking into account the level of information available regarding to new entries and exits of the election censuses between the two elections.}
-\item{VTM.complete}{ A matrix of order J'xK' with the estimated proportions of vote transitions from election 1 to election 2, including in \code{regular} and \code{raw} scenarios the row and the column corresponding to net_entries and net_exits even when they are really small, less than 1\% in all units.}
+\item{EHet}{ A matrix of order IxK measuring in each spatial unit a distance to the homogeneity hypothesis. That is, the differences under the homogeneity hypothesis between the actual recorded results and the expected results in each territorial unit for each option of election two.}
 }
 \description{
 Estimates RxC vote transfer matrices (ecological contingency tables) with lphom
@@ -94,17 +104,23 @@ transition probability matrix}
 }
 }
 \examples{
-lphom(France2017P[, 1:8] , France2017P[, 9:12], new_and_exit_voters= "raw", 
-      structural_zeros = NULL, verbose = FALSE)
+lphom(France2017P[, 1:8] , France2017P[, 9:12], new_and_exit_voters= "raw")
 }
 \references{
 Romero, R, Pavia, JM, Martin, J and Romero G (2020). Assessing uncertainty of voter transitions estimated from aggregated data. Application to the 2017 French presidential election. \emph{Journal of Applied Statistics}, 47(13-15), 2711-2736. \doi{10.1080/02664763.2020.1804842}
 }
 \seealso{
-\code{\link{tslphom}} \code{\link{nslphom}}
+\code{\link{tslphom}} \code{\link{nslphom}} \code{\link{lclphom}}
 
 Other linear programing ecological inference functions: 
+\code{\link{lclphom}()},
+\code{\link{lphom_dual}()},
+\code{\link{lphom_joint}()},
+\code{\link{nslphom_dual}()},
+\code{\link{nslphom_joint}()},
 \code{\link{nslphom}()},
+\code{\link{tslphom_dual}()},
+\code{\link{tslphom_joint}()},
 \code{\link{tslphom}()}
 }
 \author{

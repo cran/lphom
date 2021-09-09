@@ -11,7 +11,9 @@ tslphom(
   structural_zeros = NULL,
   uniform = TRUE,
   distance.local = c("abs", "max", "none"),
-  verbose = FALSE
+  counts = FALSE,
+  verbose = FALSE,
+  solver = "lp_solve"
 )
 }
 \arguments{
@@ -47,21 +49,31 @@ should be performed in order to resolve potential indeterminacies of local solut
 Default, \code{"abs"}.
 If \code{distance.local = "abs"} lphom_local selects in its the second step the matrix
 closer to the \strong{lphom()} solution under L_1 norm, among the first step compatible matrices.
-If \code{distance.local = "abs"} lphom_local selects in its the second step the matrix
+If \code{distance.local = "max"} lphom_local selects in its the second step the matrix
 closer to the \strong{lphom()} solution under L_Inf norm, among the first step compatible matrices.
 If \code{distance.local = "none"}, the second step of lphom_local is not performed.}
 
+\item{counts}{A TRUE/FALSE value that indicates whether the problem is solved in integer values (counts),
+in both iterations: zero (lphom) and final (including unit) solutions. If TRUE, the LP matrices
+are approximated to the closest integer solution solving the corresponding Integer Linear Program.
+Default, FALSE.}
+
 \item{verbose}{A TRUE/FALSE value that indicates if the main outputs of the function should be
 printed on the screen. Default, FALSE.}
+
+\item{solver}{A character string indicating the linear programming solver to be used, only
+\code{lp_solve} and \code{symphony} are allowed. By default, \code{lp_solve}.}
 }
 \value{
 A list with the following components
-\item{VTM}{ A matrix of order JxK with the estimated percentages of vote transitions from election 1 to election 2.}
+\item{VTM}{ A matrix of order JxK with the estimated percentages of row-standardized vote transitions from election 1 to election 2.}
+\item{VTM.votes}{ A matrix of order JxK with the estimated vote transitions from election 1 to election 2.}
 \item{OTM}{ A matrix of order KxJ with the estimated percentages of the origin of the votes obtained for the different options of election 2.}
 \item{HETe}{ The estimated heterogeneity index as defined in equation (15) of Pavia and Romero (2021).}
-\item{VTM.complete}{ A matrix of order J'xK' with the estimated proportions of vote transitions from election 1 to election 2, including in \code{regular} and \code{raw} scenarios the row and the column corresponding to net_entries and net_exits even when they are really small, less than 1\% in all units.}
-\item{VTM_units}{ An array of order J'xK'xI with the estimated proportions of vote transitions from election 1 to election 2 attained for each unit after adjusting the \strong{lphom()} initial estimate.}
-\item{VTM_votes}{ An array of order J'xK'xI with the estimated matrix of vote transitions from election 1 to election 2 attained for each unit after adjusting the \strong{lphom()} initial estimate.}
+\item{VTM.complete}{ A matrix of order J'xK' with the estimated proportions of row-standardized vote transitions from election 1 to election 2, including in \code{regular} and \code{raw} scenarios the row and the column corresponding to net_entries and net_exits even when they are really small, less than 1\% in all units.}
+\item{VTM.complete.votes}{ A matrix of order J'xK' with the estimated vote transitions from election 1 to election 2, including in \code{regular} and \code{raw} scenarios the row and the column corresponding to net_entries and net_exits even when they are really small, less than 1\% in all units.}
+\item{VTM.prop.units}{ An array of order J'xK'xI with the estimated proportions of vote transitions from election 1 to election 2 attained for each unit after adjusting the \strong{lphom()} initial estimate.}
+\item{VTM.votes.units}{ An array of order J'xK'xI with the estimated matrix of vote transitions from election 1 to election 2 attained for each unit after adjusting the \strong{lphom()} initial estimate.}
 \item{zeros}{ A list of vectors of length two, indicating the election options for which no transfer of votes are allowed between election 1 and election 2.}
 \item{inputs}{ A list containing all the objects with the values used as arguments by the function.}
 \item{origin}{ A matrix with the final data used as votes of the origin election after taking into account the level of information available regarding to new entries and exits of the election censuses between the two elections.}
@@ -120,21 +132,28 @@ transition probability matrix}
 }
 }
 \examples{
-mt.ts <- tslphom(France2017P[, 1:8] , France2017P[, 9:12],
-                 new_and_exit_voters= "raw")
+mt.ts <- tslphom(France2017P[, 1:8] , France2017P[, 9:12], new_and_exit_voters= "raw")
 mt.ts$VTM
 mt.ts$HETe
 mt.ts$solution_init$HETe_init
+
 }
 \references{
-Pavia, JM, and Romero, R (2021). Improving estimates accuracy of voter transitions. Two new algorithms for ecological inference based on linear programming, mimeo.
+Pavia, JM, and Romero, R (2021). Improving estimates accuracy of voter transitions. Two new algorithms for ecological inference based on linear programming. \doi{10.31124/advance.14716638.v1}.
 }
 \seealso{
-\code{\link{lphom}} \code{\link{nslphom}}
+\code{\link{lphom}} \code{\link{nslphom}} \code{\link{lclphom}}
 
 Other linear programing ecological inference functions: 
+\code{\link{lclphom}()},
+\code{\link{lphom_dual}()},
+\code{\link{lphom_joint}()},
 \code{\link{lphom}()},
-\code{\link{nslphom}()}
+\code{\link{nslphom_dual}()},
+\code{\link{nslphom_joint}()},
+\code{\link{nslphom}()},
+\code{\link{tslphom_dual}()},
+\code{\link{tslphom_joint}()}
 }
 \author{
 Jose M. Pavia, \email{pavia@uv.es}

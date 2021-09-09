@@ -54,27 +54,27 @@ error_lphom <- function(lphom.object, upper.alfa = 0.10,
   num.d <- as.integer(num.d); B <- as.integer(B)
   if (num.d < 5) stop('num.d must be a integer greater than 5')
   if (B < 1) stop('B must be a integer greater than 0')
-  num.q <- (num.d + 1)/2
+  num.q <- (num.d + 1L)/2
   d0.ref <- hallar_d0(lphom.object)
-  id = d0.ref[1] + d0.ref[2]*((1:num.d)-num.q)
-  while (id[1] < 0) {
-    d0.ref[2] <- d0.ref[2]/2
-    id = d0.ref[1] + d0.ref[2]*((1:num.d)-num.q)
+  id = d0.ref[1L] + d0.ref[2L]*((1L:num.d)-num.q)
+  while (id[1L] < 0) {
+    d0.ref[2L] <- d0.ref[2L]/2
+    id = d0.ref[1L] + d0.ref[2L]*((1L:num.d)-num.q)
   }
-  id <- seq(id[1], id[1] + 0.25, d0.ref[2]) # Expansión de id
+  id <- seq(id[1L], id[1] + 0.25, d0.ref[2L]) # Expansión de id
   escenarios <- simular_escenarios(lphom.object = lphom.object, M.d = id, B = B)
-  log.HETe <- log(escenarios$estadisticos[,2])
+  log.HETe <- log(escenarios$estadisticos[, 2L])
   log.HETe2 <- log.HETe^2
   log.EI <- log(escenarios$estadisticos[,3])
   bbdd <- data.frame(log.EI, log.HETe, log.HETe2)
   equation <- stats::lm(log.EI ~ log.HETe + log.HETe2, data = bbdd)
   EI.pred <- exp(stats::predict(equation, newdata = bbdd, interval = "prediction",
-                         level = 1 - upper.alfa))
+                         level = 1L - upper.alfa))
   EI.estimation <- data.frame(log.HETe = log(lphom.object$HETe),
                               log.HETe2 = log(lphom.object$HETe)^2)
   EI.estimation <- exp(stats::predict(equation, newdata = EI.estimation,
-                               interval = "prediction", level = 1 - upper.alfa))
-  bbdd1 <- cbind(bbdd, medias = log(EI.pred[, 1]), maximos = log(EI.pred[, 3]))
+                               interval = "prediction", level = 1L - upper.alfa))
+  bbdd1 <- cbind(bbdd, medias = log(EI.pred[, 1]), maximos = log(EI.pred[, 3L]))
   theme_own <- ggplot2::theme_bw() + ggplot2::theme(aspect.ratio = 1)
   #  p1 <- ggplot2::ggplot(bbdd1, aes(log.HETe, log.EI)) +
   #    geom_point(color = "blue", shape = 4) +
@@ -93,17 +93,17 @@ error_lphom <- function(lphom.object, upper.alfa = 0.10,
     #    geom_vline(xintercept = lphom.object$HETe, linetype="dotted", color = "green", size = 1.2) +
     #    geom_hline(yintercept = EI.estimation[c(1,3)], linetype="dotted", color = "green", size = 1.2) +
     ggplot2::geom_segment(ggplot2::aes(x = lphom.object$HETe, xend = lphom.object$HETe, y = 0,
-                              yend = EI.estimation[1]), linetype="dotted", color = "green", size = 1.1) +
-    ggplot2::geom_segment(ggplot2::aes(x = 0, xend = lphom.object$HETe, y = EI.estimation[1],
-                              yend = EI.estimation[1]), linetype="dotted", color = "green", size = 1.1) +
-    ggplot2::geom_segment(ggplot2::aes(x = lphom.object$HETe, xend = lphom.object$HETe, y = EI.estimation[1],
-                              yend = EI.estimation[3]), linetype="dotted", color = "yellow", size = 1) +
-    ggplot2::geom_segment(ggplot2::aes(x = 0, xend = lphom.object$HETe, y = EI.estimation[3],
-                              yend = EI.estimation[3]), linetype="dotted", color = "yellow", size = 1) +
+                              yend = EI.estimation[1L]), linetype="dotted", color = "green", size = 1.1) +
+    ggplot2::geom_segment(ggplot2::aes(x = 0, xend = lphom.object$HETe, y = EI.estimation[1L],
+                              yend = EI.estimation[1L]), linetype="dotted", color = "green", size = 1.1) +
+    ggplot2::geom_segment(ggplot2::aes(x = lphom.object$HETe, xend = lphom.object$HETe, y = EI.estimation[1L],
+                              yend = EI.estimation[3L]), linetype="dotted", color = "yellow", size = 1) +
+    ggplot2::geom_segment(ggplot2::aes(x = 0, xend = lphom.object$HETe, y = EI.estimation[3L],
+                              yend = EI.estimation[3L]), linetype="dotted", color = "yellow", size = 1) +
     theme_own
   if (show.plot) suppressWarnings(print(p2))
-  output <-list("EI.estimate" = round(EI.estimation[1], 2),
-                "EI.upper" = round(EI.estimation[3], 2),
+  output <-list("EI.estimate" = round(EI.estimation[1L], 2),
+                "EI.upper" = round(EI.estimation[3L], 2),
                 "figure" = p2, "equation" = equation,
                 "statistics" = escenarios$estadisticos,
                 "TMs.real" = escenarios$MT.reales, "TMs.estimates" = escenarios$MT.estimadas)

@@ -29,9 +29,16 @@
 #'                         entries are computed because the sum by rows of `votes_election1` and
 #'                         `votes_election2` does not coincide.
 #'
+#' @param counts A TRUE/FALSE value that indicates whether the linked LP solution of votes must be approximate
+#'               to the closest integer solution using ILP. Default, FALSE.
+#'
 #' @param verbose A TRUE/FALSE value that indicates if the main outputs of the function should be
 #'                printed on the screen. Default, FALSE.
 #'
+#' @param solver A character string indicating the linear programming solver to be used, only
+#'               `lp_solve` and `symphony` are allowed. By default, `lp_solve`.
+
+
 #'
 #' @details Description of the `new_and_exit_voters` argument in more detail.
 #' \itemize{
@@ -74,29 +81,35 @@
 #'
 #' @return
 #' A list with the following components
-#'  \item{VTM}{ A matrix of order JxK with the estimated percentages of vote transitions from election 1 to election 2.}
+#'  \item{VTM}{ A matrix of order JxK with the estimated percentages of row-standardized vote transitions from election 1 to election 2.}
+#'  \item{VTM.votes}{ A matrix of order JxK with the estimated vote transitions from election 1 to election 2.}
 #'  \item{OTM}{ A matrix of order KxJ with the estimated percentages of the origin of the votes obtained for the different options of election 2.}
 #'  \item{HETe}{ The estimated heterogeneity index defined in equation (11) of Romero et al. (2020).}
-#'  \item{EHet}{ A matrix of order IxK measuring in each spatial unit a distance to the homogeneity hypothesis, that is, the differences under the homogeneity hypothesis between the actual recorded results and the expected results in each territorial unit for each option of election two.}
+#'  \item{VTM.complete}{ A matrix of order J'xK' with the estimated proportions of row-standardized vote transitions from election 1 to election 2, including in `regular` and `raw` scenarios the row and the column corresponding to net_entries and net_exits even when they are really small, less than 1% in all units.}
+#'  \item{VTM.complete.votes}{ A matrix of order J'xK' with the estimated vote transitions from election 1 to election 2, including in `regular` and `raw` scenarios the row and the column corresponding to net_entries and net_exits even when they are really small, less than 1% in all units.}
 #'  \item{inputs}{ A list containing all the objects with the values used as arguments by the function.}
 #'  \item{origin}{ A matrix with the final data used as votes of the origin election after taking into account the level of information available regarding to new entries and exits of the election censuses between the two elections.}
 #'  \item{destination}{ A matrix with the final data used as votes of the origin election after taking into account the level of information available regarding to new entries and exits of the election censuses between the two elections.}
-#'  \item{VTM.complete}{ A matrix of order J'xK' with the estimated proportions of vote transitions from election 1 to election 2, including in `regular` and `raw` scenarios the row and the column corresponding to net_entries and net_exits even when they are really small, less than 1% in all units.}
+#'  \item{EHet}{ A matrix of order IxK measuring in each spatial unit a distance to the homogeneity hypothesis. That is, the differences under the homogeneity hypothesis between the actual recorded results and the expected results in each territorial unit for each option of election two.}
 #' @export
 #'
 #'
 #' @family linear programing ecological inference functions
-#' @seealso \code{\link{tslphom}} \code{\link{nslphom}}
+#' @seealso \code{\link{tslphom}} \code{\link{nslphom}} \code{\link{lclphom}}
 #'
 #' @examples
-#' lphom(France2017P[, 1:8] , France2017P[, 9:12], new_and_exit_voters= "raw", 
-#'       structural_zeros = NULL, verbose = FALSE)
+#' lphom(France2017P[, 1:8] , France2017P[, 9:12], new_and_exit_voters= "raw")
 #
+#' @importFrom Rsymphony Rsymphony_solve_LP
 #' @importFrom lpSolve lp
 #
-lphom <- function(votes_election1, votes_election2,
+lphom <- function(votes_election1,
+                  votes_election2,
                   new_and_exit_voters = c("regular", "raw", "simultaneous", "full", "gold"),
-                  structural_zeros = NULL, verbose = FALSE){
+                  structural_zeros = NULL,
+                  counts = FALSE,
+                  verbose = FALSE,
+                  solver = "lp_solve"){
 
   # Loading package lpSolve
 #  if (!require(lpSolve)) install.packages("lpSolve", repos = "http://cran.rstudio.com")
@@ -105,7 +118,7 @@ lphom <- function(votes_election1, votes_election2,
   # inputs
   inputs <- list("votes_election1" = votes_election1, "votes_election2" = votes_election2,
                  "new_and_exit_voters" = new_and_exit_voters[1], "structural_zeros" = structural_zeros,
-                 "verbose" = verbose)
+                 "counts" = counts, "verbose" = verbose, "solver" = solver)
 
   # Data conditions
   x = as.matrix(votes_election1)
@@ -118,24 +131,26 @@ lphom <- function(votes_election1, votes_election2,
           The only allowed strings for "new_and_exit_voters" are "regular", "raw", "simultaneous", "full" and "gold".')
   if (new_and_exit_voters %in% c("simultaneous", "full", "gold")){
     if (!identical(round(rowSums(x)), round(rowSums(y)))){
-      texto <- paste0('The number of voters (electors) in Election 1 and',
+      texto <- paste0('The number of voters (electors) in Election 1 and ',
                       'Election 2 differ in at least a territorial unit. This is not ',
                       'allowed in a \"', new_and_exit_voters, ' scenario \".')
       stop(texto)
     }
   }
   if (min(x,y) < 0) stop('Negative values for voters (electors) are not allowed')
+  if (!(solver %in% c("symphony", "lp_solve")))
+    stop('Only "symponhy", "lp_solve" are allowed as solvers')
 
   # Data preparation
   net_entries = net_exits = TRUE
   tt = sum(x)
   if (new_and_exit_voters %in% c("regular", "raw")){
-    NET_ENTRIES = NET_EXITS = rep(0,nrow(x))
+    NET_ENTRIES = NET_EXITS = rep(0L, nrow(x))
     x = cbind(x, NET_ENTRIES); y = cbind(y, NET_EXITS)
 
     # Estimation of net entries/exits in the election census
     d = rowSums(y) - rowSums(x)
-    if (any(d != 0)) {
+    if (any(d != 0L)) {
       th = sum(d[d > 0])
       te = -sum(d[d < 0])
       message(paste0('*********************WARNING*********************\n',
@@ -160,11 +175,11 @@ lphom <- function(votes_election1, votes_election2,
     }
 
     # Net entries and exits
-    if (sum(x[,ncol(x)]) == 0){
+    if (sum(x[,ncol(x)]) == 0L){
       net_entries = FALSE
       x = x[,-ncol(x)]
     }
-    if (sum(y[,ncol(y)]) == 0){
+    if (sum(y[,ncol(y)]) == 0L){
       net_exits = FALSE
       y = y[,-ncol(y)]
     }
@@ -174,33 +189,40 @@ lphom <- function(votes_election1, votes_election2,
   # Names of election options
   names1 = colnames(x); names2 = colnames(y)
   # Constraints sum(pjk)=1
-  a1 = matrix(0, J, JK)
-  for (j in 1:J) {
-    a1[j,((j-1)*K+1):(j*K)]=1
-  }
-  a1 = cbind(a1, matrix(0, J, 2*IK))
-  b1 = rep(1,J)
+  a1 = cbind(kronecker(diag(J), t(rep(1L, K))), matrix(0L, J, 2L*IK))
+#  a1 = matrix(0, J, JK)
+#  for (j in 1:J) {
+#    a1[j,((j-1)*K+1):(j*K)]=1
+#  }
+#  a1 = cbind(a1, matrix(0, J, 2*IK))
+  b1 = rep(1L, J)
   # Constraints total match for K parties
   xt = colSums(x)
   yt = colSums(y)
-  at = matrix(0, K, JK+2*IK)
-  for (j in 1:J){
-    at[,((j-1)*K+1):(j*K)] = diag(xt[j], K)
-  }
+  at = cbind(t(kronecker(xt, diag(K))), matrix(0L, K, 2L*IK))
+#  at = cbind(kronecker(diag(1, J, J), t(rep(1,K))), matrix(0, J, 2*IK))
+#  at = matrix(0, K, JK+2*IK)
+#  for (j in 1:J){
+#    at[,((j-1)*K+1):(j*K)] = diag(xt[j], K)
+#  }
   bt = yt
   # Constraints to match votes in the I spatial units and K parties
-  ap = matrix(0, 0, JK+2*IK)
-  bp = NA
-  for (i in 1:I) {
-    ai = matrix(0, K, 0)
-    for (j in 1:J) {ai = cbind(ai,diag(x[i,j],K))}
-    ai = cbind(ai,matrix(0,K,2*IK))
-    bi= y[i,]
-    ap = rbind(ap,ai)
-    bp = c(bp,bi)
-  }
-  bp = bp[-1]
-  for (f in 1:IK) {ap[f,JK+c(2*f-1,2*f)] = c(1,-1)}
+#  ap = matrix(0, 0, JK+2*IK)
+# bp = NA
+#  for (i in 1:I) {
+#    ai = matrix(0, K, 0)
+#    for (j in 1:J) {ai = cbind(ai,diag(x[i,j],K))} # ai_0 = t(kronecker(x[i,], diag(1, K, K)))
+#    ai = cbind(ai,matrix(0,K,2*IK))
+#   bi= y[i,]
+#    ap = rbind(ap,ai)
+#    bp = c(bp,bi)
+#  }
+#  ap = cbind(kronecker(x, diag(K)), matrix(0, IK, 2*IK))
+#  bp = bp[-1]
+  bp = as.vector(t(y))
+#  for (f in 1:IK) {ap[f,JK+c(2*f-1,2*f)] = c(1,-1)}
+  ap = cbind(kronecker(x, diag(K)), t(kronecker(diag(IK), c(1L,-1L))))
+
   # Joining the three sets of constraints
   ae = rbind(a1,at,ap)
   be = c(b1,bt,bp)
@@ -208,21 +230,21 @@ lphom <- function(votes_election1, votes_election2,
   # respectively, to net entries and net exits.
   if (new_and_exit_voters == "raw" & net_exits){
     if (net_entries){
-      pb = yt[K]/sum(xt[1:(J-1)])
-      ab = matrix(0,J,JK+2*IK)
-      bb = rep(0,J)
-      for (j in 1:J){
-        ab[j,j*K] = 1
+      pb = yt[K]/sum(xt[1L:(J-1L)])
+      ab = matrix(0L, J, JK+2L*IK)
+      bb = rep(0L, J)
+      for (j in 1L:J){
+        ab[j,j*K] = 1L
         bb[j]=pb*(j<J)
       }
       ae = rbind(ae,ab)
       be = c(be,bb)
     } else {
-      pb = yt[K]/sum(xt[1:J])
-      ab = matrix(0,J,JK+2*IK)
-      bb = rep(0,J)
-      for (j in 1:J){
-        ab[j,j*K] = 1
+      pb = yt[K]/sum(xt[1L:J])
+      ab = matrix(0L, J, JK+2L*IK)
+      bb = rep(0L, J)
+      for (j in 1L:J){
+        ab[j,j*K] = 1L
         bb[j]=pb
       }
       ae = rbind(ae,ab)
@@ -233,21 +255,21 @@ lphom <- function(votes_election1, votes_election2,
   # voters and net entries and pjk(j,K) constant related to net exits.
   if (new_and_exit_voters == "regular" & net_exits){
     if (net_entries){
-      pb = yt[K]/sum(xt[1:(J-2)])
-      ab = matrix(0,J,JK+2*IK)
-      bb = rep(0,J)
-      for (j in 1:J){
-        ab[j,j*K] = 1
-        bb[j]=pb*(j<(J-1))
+      pb = yt[K]/sum(xt[1L:(J-2L)])
+      ab = matrix(0L, J , JK+2L*IK)
+      bb = rep(0L, J)
+      for (j in 1L:J){
+        ab[j,j*K] = 1L
+        bb[j]=pb*(j<(J-1L))
       }
       ae = rbind(ae,ab)
       be = c(be,bb)
     } else {
-      pb = yt[K]/sum(xt[1:(J-1)])
-      ab = matrix(0,J,JK+2*IK)
-      bb = rep(0,J)
-      for (j in 1:J){
-        ab[j,j*K] = 1
+      pb = yt[K]/sum(xt[1L:(J-1L)])
+      ab = matrix(0L, J, JK+2L*IK)
+      bb = rep(0L, J)
+      for (j in 1L:J){
+        ab[j,j*K] = 1L
         bb[j]=pb*(j<J)
       }
       ae = rbind(ae,ab)
@@ -257,12 +279,12 @@ lphom <- function(votes_election1, votes_election2,
   # Full scenario. Constraint pjk(J, K)= pik(J-1,K) = 0 related to new young
   # voters and immigrants and pjk(j,K) constant related to exits.
   if (new_and_exit_voters == "full"){
-    pb = yt[K]/sum(xt[1:(J-2)])
-    ab = matrix(0,J,JK+2*IK)
+    pb = yt[K]/sum(xt[1L:(J-2L)])
+    ab = matrix(0,J,JK + 2L*IK)
     bb = rep(0,J)
-    for (j in 1:J){
-      ab[j,j*K] = 1
-      bb[j]=pb*(j<J-1)
+    for (j in 1L:J){
+      ab[j,j*K] = 1L
+      bb[j]=pb*(j<J-1L)
     }
     ae = rbind(ae,ab)
     be = c(be,bb)
@@ -272,76 +294,93 @@ lphom <- function(votes_election1, votes_election2,
   # pjk(j,K-1) and pjk(j,K) constant related to exits.
   if (new_and_exit_voters == "gold"){
     # Column K-1
-    pb = yt[K-1]/sum(xt[1:(J-2)])
-    ab = matrix(0,J,JK+2*IK)
+    pb = yt[K-1L]/sum(xt[1L:(J-2L)])
+    ab = matrix(0L, J, JK+2L*IK)
     bb = rep(0,J)
-    for (j in 1:J){
-      ab[j,(K-1)+(j-1)*K] = 1
-      bb[j]=pb*(j<(J-1))
+    for (j in 1L:J){
+      ab[j,(K-1L) + (j-1L)*K] = 1L
+      bb[j]=pb*(j<(J-1L))
     }
     ae = rbind(ae,ab)
     be = c(be,bb)
     # Column K
-    pb = yt[K]/sum(xt[1:(J-2)])
-    ab = matrix(0,J,JK+2*IK)
-    bb = rep(0,J)
-    for (j in 1:J){
-      ab[j,j*K] = 1
-      bb[j]=pb*(j<(J-1))
+    pb = yt[K]/sum(xt[1L:(J - 2L)])
+    ab = matrix(0L, J, JK+2L*IK)
+    bb = rep(0L, J)
+    for (j in 1L:J){
+      ab[j,j*K] = 1L
+      bb[j]=pb*(j<(J-1L))
     }
     ae = rbind(ae,ab)
     be = c(be,bb)
   }
   # Structural zero restrictions introduced by the user
   if (length(structural_zeros) > 0){
-    ast = matrix(0, length(structural_zeros), JK+2*IK)
-    bst = rep(0, length(structural_zeros))
-    for (i in 1:length(structural_zeros)){
-      ast[i, K*(structural_zeros[[i]][1]-1)+structural_zeros[[i]][2]] = 1
+    ast = matrix(0L, length(structural_zeros), JK+2L*IK)
+    bst = rep(0L, length(structural_zeros))
+    for (i in 1L:length(structural_zeros)){
+      ast[i, K*(structural_zeros[[i]][1L]-1L)+structural_zeros[[i]][2L]] = 1L
     }
     ae = rbind(ae,ast)
     be = c(be,bst)
   }
   # Objective function, to minimize
-  fun.obj = c(rep(0,JK), rep(1,2*IK))
+  fun.obj = c(rep(0L, JK), rep(1L, 2L*IK))
   # Solution
-  sol=suppressWarnings(lpSolve::lp('min', fun.obj, ae, rep('=', length(be)), be))
+  if (solver == "symphony"){
+      sol = Rsymphony::Rsymphony_solve_LP(obj = fun.obj,
+                                          mat = ae,
+                                          dir = rep('==', length(be)),
+                                          rhs = be)
+  } else {
+     sol = suppressWarnings(lpSolve::lp('min', fun.obj, ae, rep('=', length(be)), be) )
+
+  }
   z = sol$solution
-  pjk = matrix(z[1:JK], J, K, TRUE, dimnames = list(names1,names2))
-  e = z[(JK+1):(JK+2*IK)]
-  e = matrix(e,2,IK)
-  e = e[1,] - e[2,]
+  pjk = matrix(z[1:JK], J, K, TRUE, dimnames = list(names1, names2))
+  if (counts){
+    vjk <- pjk*colSums(x)
+    vjk <- dec2counts(vjk, colSums(x), colSums(y))
+    pjk <- vjk/rowSums(vjk)
+    dimnames(pjk) <- list(names1, names2)
+  }
+  e = z[(JK+1L):(JK+2L*IK)]
+  e = matrix(e, 2L, IK)
+  e = e[1L,] - e[2L,]
   eik = t(matrix(e,K,I))
   colnames(eik) = names2
   rownames(eik) = rownames(x)
   EHet = eik
-  pkj = matrix(0, K, J, dimnames=list(names2,names1))
-  for (k in 1:K) {
-    for (j in 1:J) {
+  pkj = matrix(0L, K, J, dimnames=list(names2,names1))
+  for (k in 1L:K) {
+    for (j in 1L:J) {
       pkj[k,j]=xt[j]*pjk[j,k]/yt[k]
     }
   }
   pjk.complete <- pjk
+  vjk <- pjk*colSums(x)
+  vjk.complete <- vjk
   if (new_and_exit_voters %in% c("regular", "raw")){
     if (net_entries & max(x[,ncol(x)]/rowSums(x)) < 0.01){
-      pjk = pjk[-J,]; eik = eik[-J,]; pkj = pkj[,-J]
+      pjk = pjk[-J,]; eik = eik[-J,]; pkj = pkj[,-J]; vjk = vjk[,-J]
     }
     if (net_exits & max(y[,ncol(y)]/rowSums(y)) < 0.01){
-      pjk = pjk[,-K]; eik = eik[,-K]; pkj = pkj[-K,]
+      pjk = pjk[,-K]; eik = eik[,-K]; pkj = pkj[-K,]; vjk = vjk[-K,]
     }
   }
   HIe = 100*sum(abs(eik))/tt
-  pjk = round(100*pjk,2)
-  pkj = round(100*pkj,2)
+  pjk = round(100*pjk, 2)
+  pkj = round(100*pkj, 2)
   if (verbose){
-    cat("\n\nEstimated Heterogeneity Index HIe:",round(HIe, 2),"%\n")
+    cat("\n\nEstimated Heterogeneity Index HETe:",round(HIe, 2),"%\n")
     cat("\n\n Matrix of vote transitions (in %) from Election 1 to Election 2\n\n")
     print(pjk)
     cat("\n\n Origin (%) of the votes obtained in Election 2\n\n")
     print(pkj)
   }
-  output <- list("VTM" = pjk, "OTM" = pkj, "HETe" = HIe, "EHet" = EHet,
-                 "inputs" = inputs, "origin" = x, "destination" = y, "VTM.complete" = pjk.complete)
+  output <- list("VTM" = pjk, "VTM.votes" = vjk, "OTM" = pkj, "HETe" = HIe,
+                 "VTM.complete" = pjk.complete, "VTM.complete.votes" = vjk.complete,
+                 "inputs" = inputs, "origin" = x, "destination" = y, "EHet" = EHet)
   class(output) <- "lphom"
   return(output)
 }
