@@ -15,9 +15,9 @@ error_lphom(
 \arguments{
 \item{lphom.object}{An object output of the \strong{lphom()} function.}
 
-\item{upper.alfa}{Upper bound that will not exceed by the EI estimate with a confidence 1 - alpha. By default, 0.10.}
+\item{upper.alfa}{Upper bound that will not be exceed by the EI estimate with a confidence 1 - alpha. By default, 0.10.}
 
-\item{show.plot}{TRUE/FALSE. Indicates whether the graphical representation describing the relationship between EI and HETe estimated by simulation for the election under study should be displayed as a side-effect. By default, TRUE.}
+\item{show.plot}{TRUE/FALSE. Indicates whether the plot showing the relationship between EI and HETe estimated by simulation for the election under study should be displayed as a side-effect. By default, TRUE.}
 
 \item{num.d}{Number maximum of different disturbances, \code{d}, to be initially considered. Positive integer greater than or equal to 5. By default, 11.}
 
@@ -38,6 +38,8 @@ Estimation of the error index (EI) of a RxC vote transfer matrix obtained with \
 }
 \note{
 ggplot2 is needed to be installed for this function to work.
+
+See equation (12) in Romero et al. (2020) for a definition of the EI index.
 }
 \examples{
 mt.lphom <- lphom(France2017P[, 1:8], France2017P[, 9:12], "raw", NULL, FALSE)

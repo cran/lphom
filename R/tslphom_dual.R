@@ -6,16 +6,16 @@
 #' @author Rafael Romero \email{rromero@@eio.upv.es}
 #' @references Pavia, JM and Romero, R (2021). Symmetry estimating R×C vote transfer matrices from aggregate data, mimeo.
 #'
-#' @param votes_election1 data.frame (or matrix) of order IxJ with the votes gained by the *J*
-#'                        political options competing on election 1 (or origin) in the *I*
-#'                        territorial units considered. In general, the counts to be initially
-#'                        mapped to columns. The sum by rows of `votes_election1` and
+#' @param votes_election1 data.frame (or matrix) of order IxJ with the counts to be initially
+#'                        mapped to rows. When estimating vote transfer matrices, the votes gained by 
+#'                        the *J* political options competing on election 1 (or origin) in the *I*
+#'                        territorial units considered.  The sum by rows of `votes_election1` and
 #'                        `votes_election2` must coincide.
 #'
-#' @param votes_election2 data.frame (or matrix) of order IxK with the votes gained by
-#'                        the *K* political options competing on election 2 (or destination)
-#'                        in the *I* territorial units considered. In general, the counts to be
-#'                        initially mapped to columns. The sum by rows of `votes_election1` and
+#' @param votes_election2 data.frame (or matrix) of order IxK with the counts to be initially mapped 
+#'                        to columns. When estimating vote transfer matrices, the votes gained by
+#'                        the *K* political options competing on election 2 (or destination) in the *I* 
+#'                        territorial units considered. In general, The sum by rows of `votes_election1` and
 #'                        `votes_election2` must coincide.
 #'
 #' @param counts A TRUE/FALSE value that indicates whether the problem is solved in integer values (counts),
@@ -117,10 +117,12 @@ tslphom_dual <- function(votes_election1,
 
   dimnames(votos.units.a) <- dimnames(votos.units.w) <- dimnames(lphom.object.12$VTM_votes)
 
-  return(list("VTM.votes.w" = VTM.votos.weigthed, "VTM.votes.units.w" = votos.units.w,
+  output <- list("VTM.votes.w" = VTM.votos.weigthed, "VTM.votes.units.w" = votos.units.w,
               "VTM.votes.a" = VTM.votos, "VTM.votes.units.a" = votos.units.a,
               "HETe.w" = HETe.w, "HETe.a" = HETe.a, "VTM12.w" = VTM1.weighted,
               "VTM21.w" = VTM2.weighted, "VTM12.a" = VTM1, "VTM21.a" = VTM2,
               "tslphom.object.12" = lphom.object.12, "tslphom.object.21" = lphom.object.21,
-              "inputs" = inputs))
+              "inputs" = inputs)
+  class(output) <- c("tslphom_dual", "ei_dual", "lphom")
+  return(output)
 }

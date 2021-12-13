@@ -12,16 +12,16 @@ lphom_joint(
 )
 }
 \arguments{
-\item{votes_election1}{data.frame (or matrix) of order IxJ with the votes gained by the \emph{J}
-political options competing on election 1 (or origin) in the \emph{I}
-territorial units considered. In general, the counts to be initially
-mapped to columns. The sum by rows of \code{votes_election1} and
+\item{votes_election1}{data.frame (or matrix) of order IxJ with the counts to be initially
+mapped to rows. When estimating vote transfer matrices, the votes gained by
+the \emph{J} political options competing on election 1 (or origin) in the \emph{I}
+territorial units considered.  The sum by rows of \code{votes_election1} and
 \code{votes_election2} must coincide.}
 
-\item{votes_election2}{data.frame (or matrix) of order IxK with the votes gained by
-the \emph{K} political options competing on election 2 (or destination)
-in the \emph{I} territorial units considered. In general, the counts to be
-initially mapped to columns. The sum by rows of \code{votes_election1} and
+\item{votes_election2}{data.frame (or matrix) of order IxK with the counts to be initially mapped
+to columns. When estimating vote transfer matrices, the votes gained by
+the \emph{K} political options competing on election 2 (or destination) in the \emph{I}
+territorial units considered. In general, The sum by rows of \code{votes_election1} and
 \code{votes_election2} must coincide.}
 
 \item{counts}{A TRUE/FALSE value that indicates whether the linked LP solution of votes must be approximate
@@ -52,7 +52,7 @@ mt$VTM.votes
 mt$HETe
 }
 \references{
-Pavia, JM and Romero, R (2021). Symmetry estimating R×C vote transfer matrices from aggregate data, mimeo.
+Pavia, JM and Romero, R (2021). Symmetry estimating RxC vote transfer matrices from aggregate data, mimeo.
 }
 \seealso{
 \code{\link{lphom}} \code{\link{lphom_dual}} \code{\link{tslphom_dual}} \code{\link{nslphom_dual}} \code{\link{tslphom_joint}} \code{\link{nslphom_joint}}

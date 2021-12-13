@@ -255,29 +255,31 @@ modelos_ajuste_estimacion_pjk <- function(matriz.errores, HETe0){
 calculo_MT_unidad <- function(lphom.object, iii, solver){
   xt <- lphom.object$origin[iii, ]
   yt <- lphom.object$destination[iii,]
+  filas0 <- which(rowSums(lphom.object$VTM.complete) == 0)
   pg <- lphom.object$VTM.complete/rowSums(lphom.object$VTM.complete)
+  pg[filas0, ] <- 0
   ceros <- determinar_zeros_estructurales(lphom.object)
   # Parameters
   nj <- length(xt)
   nk <- length(yt)
   njk <- nj * nk
-
+  
   # restricciones sum(pjk)=1
   a1 <- kronecker(diag(nj), t(rep(1L, nk)))
   b1 <- rep(1L, nj)
-
+  
   # restricciones cuadre total de votos para los nk partidos
   at <- t(kronecker(xt, diag(nk)))
   bt <- yt
-
+  
   # restricciones para definir los ejk
   ajk <- cbind(kronecker(diag(xt), diag(nk)), t(kronecker(diag(njk), c(1L,-1L))))
   bjk <- as.vector(t(xt * pg))
-
+  
   # Sintesis
   a <- rbind(cbind(rbind(a1, at), matrix(0L, nj+nk,2L*njk)), ajk)
   b <- c(b1, bt, bjk)
-
+  
   # restricciones ceros estructurales
   if (length(ceros) > 0){
     ast = matrix(0L, length(ceros), ncol(a))
@@ -289,8 +291,8 @@ calculo_MT_unidad <- function(lphom.object, iii, solver){
     b <- c(b, bst)
   }
   # calculo bounds
-#  lb <- matrix(0, 3*njk ,1)
-#  ub <- matrix(Inf, 3*njk, 1)
+  #  lb <- matrix(0, 3*njk ,1)
+  #  ub <- matrix(Inf, 3*njk, 1)
   # Objective function, to minimize
   fun.obj <- c(rep(0L, njk), rep(1L, 2L*njk))
   # Solution
@@ -298,11 +300,11 @@ calculo_MT_unidad <- function(lphom.object, iii, solver){
     sol <- suppressWarnings(lpSolve::lp('min', fun.obj, a, rep('=', length(b)), b))
   } else {
     sol <- Rsymphony::Rsymphony_solve_LP(obj = fun.obj,
-                                       mat = a,
-                                       dir = rep('==', length(b)),
-                                       rhs = b)
+                                         mat = a,
+                                         dir = rep('==', length(b)),
+                                         rhs = b)
   }
-#  z <- sol$solution
+  #  z <- sol$solution
   # Output programa lineal 1
   sol1 <- matrix(sol$solution[1:njk], nj, nk, TRUE,
                  dimnames=dimnames(lphom.object$VTM.complete))
@@ -322,29 +324,31 @@ calculo_MT_unidad <- function(lphom.object, iii, solver){
 calculo_MT_unidad_abs <- function(lphom.object, iii, solver){
   xt <- lphom.object$origin[iii, ]
   yt <- lphom.object$destination[iii,]
+  filas0 <- which(rowSums(lphom.object$VTM.complete) == 0)
   pg <- lphom.object$VTM.complete/rowSums(lphom.object$VTM.complete)
+  pg[filas0, ] <- 0
   ceros <- determinar_zeros_estructurales(lphom.object)
   # Parameters
   nj <- length(xt)
   nk <- length(yt)
   njk <- nj * nk
-
+  
   # restricciones sum(pjk)=1
   a1 <- kronecker(diag(nj), t(rep(1L, nk)))
   b1 <- rep(1L, nj)
-
+  
   # restricciones cuadre total de votos para los nk partidos
   at <- t(kronecker(xt, diag(nk)))
   bt <- yt
-
+  
   # restricciones para definir los ejk
   ajk <- cbind(kronecker(diag(xt), diag(nk)), t(kronecker(diag(njk), c(1L,-1L))))
   bjk <- as.vector(t(xt * pg))
-
+  
   # Sintesis
   a <- rbind(cbind(rbind(a1, at), matrix(0, nj+nk,2*njk)), ajk)
   b <- c(b1, bt, bjk)
-
+  
   # restricciones ceros estructurales
   if (length(ceros) > 0){
     ast = matrix(0L, length(ceros), ncol(a))
@@ -356,8 +360,8 @@ calculo_MT_unidad_abs <- function(lphom.object, iii, solver){
     b <- c(b, bst)
   }
   # calculo bounds
-#  lb <- matrix(0, 3*njk ,1)
-#  ub <- matrix(Inf, 3*njk, 1)
+  #  lb <- matrix(0, 3*njk ,1)
+  #  ub <- matrix(Inf, 3*njk, 1)
   # Objective function, to minimize
   fun.obj <- c(rep(0L, njk), rep(1L, 2L*njk))
   # Solution
@@ -365,9 +369,9 @@ calculo_MT_unidad_abs <- function(lphom.object, iii, solver){
     sol <- suppressWarnings(lpSolve::lp('min', fun.obj, a, rep('=', length(b)), b))
   } else {
     sol <- Rsymphony::Rsymphony_solve_LP(obj = fun.obj,
-                                       mat = a,
-                                       dir = rep('==', length(b)),
-                                       rhs = b)
+                                         mat = a,
+                                         dir = rep('==', length(b)),
+                                         rhs = b)
   }
   #z <- sol$solution
   # Output programa lineal 1
@@ -377,8 +381,8 @@ calculo_MT_unidad_abs <- function(lphom.object, iii, solver){
   a <- rbind(a, fun.obj)
   b <- c(b, sol$objval)
   aa <- cbind(diag(njk),
-               matrix(0L, njk, 2L*njk),
-               a[(nj+nk+1L):(nj+nk+njk),(njk+1L):(3L*njk)])
+              matrix(0L, njk, 2L*njk),
+              a[(nj+nk+1L):(nj+nk+njk),(njk+1L):(3L*njk)])
   na <- cbind(a, matrix(0L, nrow(a), 2L*njk))
   na <- rbind(na, aa)
   pgp <- t(pg)
@@ -388,9 +392,9 @@ calculo_MT_unidad_abs <- function(lphom.object, iii, solver){
     nsol <- suppressWarnings(lpSolve::lp('min', nf, na, rep('=', length(nb)), nb))
   }else {
     nsol <- Rsymphony::Rsymphony_solve_LP(obj = nf,
-                                       mat = na,
-                                       dir = rep('==', length(nb)),
-                                       rhs = nb)
+                                          mat = na,
+                                          dir = rep('==', length(nb)),
+                                          rhs = nb)
   }
   #  nz <- nsol$solution
   # Output programa lineal 2
@@ -411,29 +415,31 @@ calculo_MT_unidad_abs <- function(lphom.object, iii, solver){
 calculo_MT_unidad_max <- function(lphom.object, iii, solver){
   xt <- lphom.object$origin[iii, ]
   yt <- lphom.object$destination[iii,]
+  filas0 <- which(rowSums(lphom.object$VTM.complete) == 0)
   pg <- lphom.object$VTM.complete/rowSums(lphom.object$VTM.complete)
+  pg[filas0, ] <- 0
   ceros <- determinar_zeros_estructurales(lphom.object)
   # Parameters
   nj <- length(xt)
   nk <- length(yt)
   njk <- nj * nk
-
+  
   # restricciones sum(pjk)=1
   a1 <- kronecker(diag(nj), t(rep(1L, nk)))
   b1 <- rep(1L, nj)
-
+  
   # restricciones cuadre total de votos para los nk partidos
   at <- t(kronecker(xt, diag(nk)))
   bt <- yt
-
+  
   # restricciones para definir los ejk
   ajk <- cbind(kronecker(diag(xt), diag(nk)), t(kronecker(diag(njk), c(1L,-1L))))
   bjk <- as.vector(t(xt * pg))
-
+  
   # Sintesis
   a <- rbind(cbind(rbind(a1, at), matrix(0L, nj+nk, 2L*njk)), ajk)
   b <- c(b1, bt, bjk)
-
+  
   # restricciones ceros estructurales
   if (length(ceros) > 0){
     ast = matrix(0L, length(ceros), ncol(a))
@@ -451,15 +457,15 @@ calculo_MT_unidad_max <- function(lphom.object, iii, solver){
     sol <- suppressWarnings(lpSolve::lp('min', fun.obj, a, rep('=', length(b)), b))
   } else {
     sol <- Rsymphony::Rsymphony_solve_LP(obj = fun.obj,
-                                       mat = a,
-                                       dir = rep('==', length(b)),
-                                       rhs = b)
+                                         mat = a,
+                                         dir = rep('==', length(b)),
+                                         rhs = b)
   }
   #z <- sol$solution
   # Output programa lineal 1
   sol1 <- matrix(sol$solution[1L:njk], nj, nk, TRUE,
                  dimnames=dimnames(lphom.object$VTM.complete))
-
+  
   # Segundo programa lineal
   a <- rbind(a, fun.obj)
   b <- c(b, sol$objval)
@@ -473,12 +479,12 @@ calculo_MT_unidad_max <- function(lphom.object, iii, solver){
   nb <- c(b, bd)
   if (solver == "lp_solve"){
     nsol <- suppressWarnings(lpSolve::lp('min', nf, na,
-                                       c(rep('=', length(b)), rep('<=', length(bd))), nb))
+                                         c(rep('=', length(b)), rep('<=', length(bd))), nb))
   } else {
     nsol <- Rsymphony::Rsymphony_solve_LP(obj = nf,
-                                       mat = na,
-                                       dir = c(rep('==', length(b)), rep('<=', length(bd))),
-                                       rhs = nb)
+                                          mat = na,
+                                          dir = c(rep('==', length(b)), rep('<=', length(bd))),
+                                          rhs = nb)
   }
   # nz <- nsol$solution
   # Output programa lineal 2
@@ -497,29 +503,31 @@ calculo_MT_unidad_max <- function(lphom.object, iii, solver){
 lphom_local <- function(lphom.object, iii, solver){
   xt <- lphom.object$origin[iii, ]
   yt <- lphom.object$destination[iii,]
+  filas0 <- which(rowSums(lphom.object$VTM.complete) == 0)
   pg <- lphom.object$VTM.complete/rowSums(lphom.object$VTM.complete)
+  pg[filas0, ] <- 0
   ceros <- determinar_zeros_estructurales(lphom.object)
   # Parameters
   nj <- length(xt)
   nk <- length(yt)
   njk <- nj * nk
-
+  
   # restricciones sum(pjk)=1
   a1 <- kronecker(diag(nj), t(rep(1L, nk)))
   b1 <- rep(1L, nj)
-
+  
   # restricciones cuadre total de votos para los nk partidos
   at <- t(kronecker(xt, diag(nk)))
   bt <- yt
-
+  
   # restricciones para definir los ejk
   ajk <- cbind(kronecker(diag(xt), diag(nk)), t(kronecker(diag(njk), c(1L,-1L))))
   bjk <- as.vector(t(xt * pg))
-
+  
   # Sintesis
   a <- rbind(cbind(rbind(a1, at), matrix(0L, nj+nk, 2L*njk)), ajk)
   b <- c(b1, bt, bjk)
-
+  
   # Restricciones de proporciones constantes para salidas
   # Escenarios
   escenario <- lphom.object$inputs$new_and_exit_voters[1L]
@@ -548,7 +556,7 @@ lphom_local <- function(lphom.object, iii, solver){
     a = rbind(a,ab)
     b = c(b,bb)
   }
-
+  
   # Regular scenario. Constraints pjk(j,K) constant.
   if ((escenario == "regular") & (K.inic < nk) & (J.inic < nj)){
     pb <- yt[nk]/sum(xt[1L:(nj-2L)])
@@ -572,7 +580,7 @@ lphom_local <- function(lphom.object, iii, solver){
     a = rbind(a,ab)
     b = c(b,bb)
   }
-
+  
   # Full scenario. Constraints pjk(j,K) constant.
   if (escenario == "full"){
     pb <- yt[nk]/sum(xt[1L:(nj - 2L)])
@@ -585,7 +593,7 @@ lphom_local <- function(lphom.object, iii, solver){
     a = rbind(a,ab)
     b = c(b,bb)
   }
-
+  
   # Gold scenario. Constraints pjk(j,K) constant.
   if (escenario == "gold"){
     # Column K-1
@@ -609,7 +617,7 @@ lphom_local <- function(lphom.object, iii, solver){
     a = rbind(a,ab)
     b = c(b,bb)
   }
-
+  
   # Restricciones de ceros estructurales introducidos por el usuario
   if (length(ceros) > 0){
     ast = matrix(0L, length(ceros), ncol(a))
@@ -620,21 +628,21 @@ lphom_local <- function(lphom.object, iii, solver){
     a <- rbind(a, ast)
     b <- c(b, bst)
   }
-
+  
   # calculo bounds
-#  lb <- matrix(0, 3*njk ,1)
-#  ub <- matrix(Inf, 3*njk, 1)
+  #  lb <- matrix(0, 3*njk ,1)
+  #  ub <- matrix(Inf, 3*njk, 1)
   # Objective function, to minimize
   fun.obj <- c(rep(0L, njk), rep(1L, 2L*njk))
   # Solution
   if (solver == "lp_solve"){
     sol <- suppressWarnings(lpSolve::lp('min', fun.obj, a, rep('=', length(b)), b))
-  #z <- sol$solution
+    #z <- sol$solution
   } else {
     sol <- Rsymphony::Rsymphony_solve_LP(obj = fun.obj,
-                                       mat = a,
-                                       dir = rep('==', length(b)),
-                                       rhs = b)
+                                         mat = a,
+                                         dir = rep('==', length(b)),
+                                         rhs = b)
   }
   # Output programa lineal 1
   sol1 <- matrix(sol$solution[1:njk], nj, nk, TRUE,
@@ -656,30 +664,32 @@ lphom_local <- function(lphom.object, iii, solver){
 lphom_local_abs <- function(lphom.object, iii, solver){
   xt <- lphom.object$origin[iii, ]
   yt <- lphom.object$destination[iii,]
+  filas0 <- which(rowSums(lphom.object$VTM.complete) == 0)
   pg <- lphom.object$VTM.complete/rowSums(lphom.object$VTM.complete)
+  pg[filas0, ] <- 0
   ceros <- determinar_zeros_estructurales(lphom.object)
-
+  
   # Parameters
   nj <- length(xt)
   nk <- length(yt)
   njk <- nj * nk
-
+  
   # restricciones sum(pjk)=1
   a1 <- kronecker(diag(nj), t(rep(1L, nk)))
   b1 <- rep(1L, nj)
-
+  
   # restricciones cuadre total de votos para los nk partidos
   at <- t(kronecker(xt, diag(nk)))
   bt <- yt
-
+  
   # restricciones para definir los ejk
   ajk <- cbind(kronecker(diag(xt), diag(nk)), t(kronecker(diag(njk), c(1L,-1L))))
   bjk <- as.vector(t(xt * pg))
-
+  
   # Sintesis
   a <- rbind(cbind(rbind(a1, at), matrix(0L, nj+nk, 2L*njk)), ajk)
   b <- c(b1, bt, bjk)
-
+  
   # Restricciones de proporciones constantes para salidas
   # Escenarios
   escenario <- lphom.object$inputs$new_and_exit_voters[1L]
@@ -708,7 +718,7 @@ lphom_local_abs <- function(lphom.object, iii, solver){
     a = rbind(a,ab)
     b = c(b,bb)
   }
-
+  
   # Regular scenario. Constraints pjk(j,K) constant.
   if ((escenario == "regular") & (K.inic < nk) & (J.inic < nj)){
     pb <- yt[nk]/sum(xt[1L:(nj-2L)])
@@ -732,7 +742,7 @@ lphom_local_abs <- function(lphom.object, iii, solver){
     a = rbind(a,ab)
     b = c(b,bb)
   }
-
+  
   # Full scenario. Constraints pjk(j,K) constant.
   if (escenario == "full"){
     pb <- yt[nk]/sum(xt[1L:(nj-2L)])
@@ -745,7 +755,7 @@ lphom_local_abs <- function(lphom.object, iii, solver){
     a = rbind(a,ab)
     b = c(b,bb)
   }
-
+  
   # Gold scenario. Constraints pjk(j,K) constant.
   if (escenario == "gold"){
     # Column K-1
@@ -769,7 +779,7 @@ lphom_local_abs <- function(lphom.object, iii, solver){
     a = rbind(a,ab)
     b = c(b,bb)
   }
-
+  
   # Restricciones de ceros estructurales introducidos por el usuario
   if (length(ceros) > 0){
     ast = matrix(0L, length(ceros), ncol(a))
@@ -780,10 +790,10 @@ lphom_local_abs <- function(lphom.object, iii, solver){
     a <- rbind(a, ast)
     b <- c(b, bst)
   }
-
+  
   # calculo bounds
-#  lb <- matrix(0, 3*njk ,1)
-#  ub <- matrix(Inf, 3*njk, 1)
+  #  lb <- matrix(0, 3*njk ,1)
+  #  ub <- matrix(Inf, 3*njk, 1)
   # Objective function, to minimize
   fun.obj <- c(rep(0L, njk), rep(1L, 2L*njk))
   # Solution
@@ -791,15 +801,15 @@ lphom_local_abs <- function(lphom.object, iii, solver){
     sol <- suppressWarnings(lpSolve::lp('min', fun.obj, a, rep('=', length(b)), b))
   } else {
     sol <- Rsymphony::Rsymphony_solve_LP(obj = fun.obj,
-                                       mat = a,
-                                       dir = rep('==', length(b)),
-                                       rhs = b)
+                                         mat = a,
+                                         dir = rep('==', length(b)),
+                                         rhs = b)
   }
   # z <- sol$solution
   # Output programa lineal 1
   sol1 <- matrix(sol$solution[1:njk], nj, nk, TRUE,
                  dimnames=dimnames(lphom.object$VTM.complete))
-
+  
   # Segundo programa lineal
   a <- rbind(a, fun.obj)
   b <- c(b, sol$objval)
@@ -815,9 +825,9 @@ lphom_local_abs <- function(lphom.object, iii, solver){
     nsol <- suppressWarnings(lpSolve::lp('min', nf, na, rep('=', length(nb)), nb))
   } else {
     nsol <- Rsymphony::Rsymphony_solve_LP(obj = nf,
-                                       mat = na,
-                                       dir = rep('==', length(nb)),
-                                       rhs = nb)
+                                          mat = na,
+                                          dir = rep('==', length(nb)),
+                                          rhs = nb)
   }
   #nz <- nsol$solution
   # Output programa lineal 2
@@ -839,30 +849,32 @@ lphom_local_abs <- function(lphom.object, iii, solver){
 lphom_local_max <- function(lphom.object, iii, solver){
   xt <- lphom.object$origin[iii, ]
   yt <- lphom.object$destination[iii,]
-  pg <- lphom.object$VTM.complete/rowSums(lphom.object$VTM.complete)
+  filas0 <- which(rowSums(lphom.object$VTM.complete) == 0) #
+  pg <- lphom.object$VTM.complete/rowSums(lphom.object$VTM.complete) 
+  pg[filas0, ] <- 0 #
   ceros <- determinar_zeros_estructurales(lphom.object)
-
+  
   # Parameters
   nj <- length(xt)
   nk <- length(yt)
   njk <- nj * nk
-
+  
   # restricciones sum(pjk)=1
   a1 <- kronecker(diag(nj), t(rep(1L, nk)))
   b1 <- rep(1L, nj)
-
+  
   # restricciones cuadre total de votos para los nk partidos
   at <- t(kronecker(xt, diag(nk)))
   bt <- yt
-
+  
   # restricciones para definir los ejk
   ajk <- cbind(kronecker(diag(xt), diag(nk)), t(kronecker(diag(njk), c(1L,-1L))))
   bjk <- as.vector(t(xt * pg))
-
+  
   # Sintesis
   a <- rbind(cbind(rbind(a1, at), matrix(0L, nj+nk, 2L*njk)), ajk)
   b <- c(b1, bt, bjk)
-
+  
   # Restricciones de proporciones constantes para salidas
   # Escenarios
   escenario <- lphom.object$inputs$new_and_exit_voters[1]
@@ -891,7 +903,7 @@ lphom_local_max <- function(lphom.object, iii, solver){
     a = rbind(a,ab)
     b = c(b,bb)
   }
-
+  
   # Regular scenario. Constraints pjk(j,K) constant.
   if ((escenario == "regular") & (K.inic < nk) & (J.inic < nj)){
     pb <- yt[nk]/sum(xt[1L:(nj-2L)])
@@ -915,7 +927,7 @@ lphom_local_max <- function(lphom.object, iii, solver){
     a = rbind(a,ab)
     b = c(b,bb)
   }
-
+  
   # Full scenario. Constraints pjk(j,K) constant.
   if (escenario == "full"){
     pb <- yt[nk]/sum(xt[1L:(nj-2L)])
@@ -928,7 +940,7 @@ lphom_local_max <- function(lphom.object, iii, solver){
     a = rbind(a,ab)
     b = c(b,bb)
   }
-
+  
   # Gold scenario. Constraints pjk(j,K) constant.
   if (escenario == "gold"){
     # Column K-1
@@ -952,7 +964,7 @@ lphom_local_max <- function(lphom.object, iii, solver){
     a = rbind(a,ab)
     b = c(b,bb)
   }
-
+  
   # Restricciones de ceros estructurales introducidos por el usuario
   if (length(ceros) > 0){
     ast = matrix(0L, length(ceros), ncol(a))
@@ -963,10 +975,10 @@ lphom_local_max <- function(lphom.object, iii, solver){
     a <- rbind(a, ast)
     b <- c(b, bst)
   }
-
+  
   # calculo bounds
-#  lb <- matrix(0, 3*njk ,1)
-#  ub <- matrix(Inf, 3*njk, 1)
+  #  lb <- matrix(0, 3*njk ,1)
+  #  ub <- matrix(Inf, 3*njk, 1)
   # Objective function, to minimize
   fun.obj <- c(rep(0L, njk), rep(1L, 2L*njk))
   # Solution
@@ -974,14 +986,14 @@ lphom_local_max <- function(lphom.object, iii, solver){
     sol <- suppressWarnings(lpSolve::lp('min', fun.obj, a, rep('=', length(b)), b))
   } else {
     sol <- Rsymphony::Rsymphony_solve_LP(obj = fun.obj,
-                                       mat = a,
-                                       dir = rep('==', length(b)),
-                                       rhs = b)
+                                         mat = a,
+                                         dir = rep('==', length(b)),
+                                         rhs = b)
   }
   # Output programa lineal 1
   sol1 <- matrix(sol$solution[1L:njk], nj, nk, TRUE,
                  dimnames=dimnames(lphom.object$VTM.complete))
-
+  
   # Segundo programa lineal
   a <- rbind(a, fun.obj)
   b <- c(b, sol$objval)
@@ -995,12 +1007,12 @@ lphom_local_max <- function(lphom.object, iii, solver){
   nb <- c(b, bd)
   if (solver == "lp_solve"){
     nsol <- suppressWarnings(lpSolve::lp('min', nf, na,
-                                       c(rep('=', length(b)), rep('<=', length(bd))), nb))
+                                         c(rep('=', length(b)), rep('<=', length(bd))), nb))
   } else {
     nsol <- Rsymphony::Rsymphony_solve_LP(obj = nf,
-                                       mat = na,
-                                       dir = c(rep('==', length(b)), rep('<=', length(bd))),
-                                       rhs = nb)
+                                          mat = na,
+                                          dir = c(rep('==', length(b)), rep('<=', length(bd))),
+                                          rhs = nb)
   }
   # Output programa lineal 2
   sol2 <- matrix(nsol$solution[1L:njk], nj, nk, TRUE,
@@ -1055,10 +1067,10 @@ dec2counts<-function(matriz, vector.fila, vector.columna){
   #       Una matriz origen-destino de numeros enteros cumpliendo las restricciones
   #       de suma de filas y columnas.
   #
-
+  
   # funcion objetivo
   objetivo<-rep(c(1L, 1L, 0L),length(vector.fila)*length(vector.columna))
-
+  
   # Restricciones de que los coeficientes de la matriz mas el valor positivo
   # menos el valor negativo debe ser igual al entero mas proximo
   R1 <- t(kronecker(diag(length(vector.fila)*length(vector.columna)),
@@ -1107,38 +1119,38 @@ model_LP <- function(votes_election1, votes_election2) {
   if (any(d != 0L)) {
     stop("At least in a unit the sums (by row) of both elections differ")
   }
-
+  
   # Parameters
   I <- nrow(x)
   J <- ncol(x)
   K <- ncol(y)
   JK <- J * K
   IK <- I * K
-
+  
   # Constraints sum(pjk)=1
   a1 <- cbind(kronecker(diag(J), t(rep(1L, K))), matrix(0L, J, 2L*IK))
   b1 <- rep(1L, J) # Segundos miembros asociados
-
+  
   # Constraints total match for K parties
   xt <- colSums(x)
   at <- cbind(t(kronecker(xt, diag(K))), matrix(0L, K, 2L*IK))
   bt <- colSums(y) # Segundos miembros asociados
-
+  
   # Constraints to match votes in the I spatial units and K parties
   bp <- as.vector(t(y))
   ap <- cbind(kronecker(x, diag(K)), t(kronecker(diag(IK), c(1L, -1L))))
-
+  
   # Joining the three sets of constraints
   a <- rbind(a1, at, ap)
   b <- c(b1, bt, bp)
-
+  
   # Bounds
   # lb <- matrix(0, JK + 2 * IK, 1)
   # ub <- matrix(Inf, JK + 2 * IK, 1)
-
+  
   # Objective function, to minimize
   fun.obj <- c(rep(0L, JK), rep(1L, 2L * IK))
-
+  
   output <- list("a" = a, "b" = b,
                  #"lb" = lb, "ub" = ub,
                  "fun.obj" = fun.obj)
@@ -1149,34 +1161,36 @@ model_LP <- function(votes_election1, votes_election2) {
 # La funcion model_local_LP calcula todos los elementos (matrices y vectores) que definen
 # el programa lineal basico asociado a lphom_local, bajo supuesto de elecciones simultaneas.
 model_local_LP <- function(MT, marginal_fila, marginal_columna){
-
+  
   xt <- as.vector(as.matrix(marginal_fila))
   yt <- as.vector(as.matrix(marginal_columna))
+  filas0 <- which(rowSums(MT) == 0) #
   pg <- MT/rowSums(MT)
-
+  pg[filas0, ] <- 0 #
+  
   # Parameters
   nj <- length(xt)
   nk <- length(yt)
   njk <- nj * nk
-
+  
   # restricciones sum(pjk)=1
   a1 <- kronecker(diag(nj), t(rep(1, nk)))
   b1 <- rep(1, nj)
-
+  
   # restricciones cuadre total de votos para los nk partidos
   at <- t(kronecker(xt, diag(nk)))
   bt <- yt
-
+  
   # restricciones para definir los ejk
   ajk <- cbind(kronecker(diag(xt), diag(nk)), t(kronecker(diag(njk), c(1L,-1L))))
   bjk <- as.vector(t(xt * pg))
-
+  
   # Sintesis
   a <- rbind(cbind(rbind(a1, at), matrix(0, nj+nk,2*njk)), ajk)
   b <- c(b1, bt, bjk)
-
+  
   fun.obj <- c(rep(0L, njk), rep(1L, 2L*njk))
-
+  
   output <- list("a" = a, "b" = b,
                  #"lb" = lb, "ub" = ub,
                  "fun.obj" = fun.obj)
@@ -1189,24 +1203,24 @@ model_local_LP <- function(MT, marginal_fila, marginal_columna){
 # siendo la solucion congruente y no dependiendo con solucion unica como se proyecte
 # a filas o columnas cada clasificacion
 MT_joint_local_0 <- function(MT, marginal_fila, marginal_columna, solver){
-
+  
   xt <- as.vector(as.matrix(marginal_fila))
   yt <- as.vector(as.matrix(marginal_columna))
-
+  
   # Parameters
   J <- nrow(MT)
   K <- ncol(MT)
   JK <- J*K
-
+  
   # Etapa 1
   m.local.12 <- model_local_LP(MT, marginal_fila, marginal_columna)
   m.local.21 <- model_local_LP(t(MT), marginal_columna, marginal_fila)
-
+  
   a <- rbind(cbind(m.local.12$a, matrix(0L, nrow(m.local.12$a), ncol(m.local.21$a))),
              cbind(matrix(0L, nrow(m.local.21$a), ncol(m.local.12$a)), m.local.21$a))
   b <- c(m.local.12$b, m.local.21$b)
   fun.obj <- c(m.local.12$fun.obj, m.local.21$fun.obj)
-
+  
   # We add the las J*K constraints of congruence
   ap <- kronecker(diag(xt), diag(K))
   aq <- matrix(0L, JK, JK)
@@ -1214,15 +1228,15 @@ MT_joint_local_0 <- function(MT, marginal_fila, marginal_columna, solver){
     aq <- aq + kronecker(t(diag(K)[,k]),
                          kronecker(-diag(J), yt[k]*diag(K)[,k]))
   }
-
+  
   a <- rbind(a,
              cbind(ap, matrix(0L, JK, 2L*JK),
                    aq, matrix(0L, JK, 2L*JK)))
   b <- c(b, rep(0L, JK))
-
+  
   # names1 <- colnames(marginal_fila)
   # names2 <- colnames(marginal_columna)
-
+  
   # Solution Etapa 1
   if (solver == "lp_solve"){
     sol <- suppressWarnings(lpSolve::lp('min', fun.obj, a, rep('=', length(b)), b))
@@ -1233,7 +1247,7 @@ MT_joint_local_0 <- function(MT, marginal_fila, marginal_columna, solver){
                                          rhs = b)
   }
   z <- sol$solution
-
+  
   # Etapa 2
   a <- rbind(a, fun.obj)
   b <- c(b, sol$objval)
@@ -1243,14 +1257,18 @@ MT_joint_local_0 <- function(MT, marginal_fila, marginal_columna, solver){
               a[(J+K+1L):(J+K+JK),(JK+1L):(3L*JK)], matrix(0L,JK,2L*JK))
   na <- cbind(a, matrix(0L, nrow(a),4L*JK))
   na <- rbind(na, aa)
-  pgp <- t(MT/rowSums(MT))
+  filas0 <- which(rowSums(MT) == 0) #
+  pgp <- t(MT/rowSums(MT)) 
+  pgp[, filas0] <- 0 #
   nb <- c(b, as.vector(pgp))
   # matriz qkj
   aa2 <- cbind(matrix(0L, JK, 3L*JK), diag(JK),
                matrix(0L, JK, 2L*JK), matrix(0L, JK, 2L*JK),
                a[(2L*(J+K)+JK+1L):(2L*(J+K)+2L*JK),(JK+3L*JK+1L):(6L*JK)])
   na2 <- rbind(na, aa2)
+  colums0 <- which(colSums(MT) == 0) #
   pgp2 <- t(t(MT)/colSums(MT))
+  pgp2[, colums0] <- 0 #
   nb2 <- c(nb, as.vector(pgp2))
   nf <- c(rep(0L, 6L*JK), rep(1L, 4L*JK))
   if (solver == "lp_solve"){
@@ -1264,7 +1282,7 @@ MT_joint_local_0 <- function(MT, marginal_fila, marginal_columna, solver){
   # Output programa lineal 2
   VTM.votos <- matrix(nsol$solution[1L:JK], J, K,
                       TRUE, dimnames = dimnames(MT)) * xt
-
+  
   return(VTM.votos)
 }
 
@@ -1296,7 +1314,7 @@ HET_joint <- function(array.votos){
   columnas <- t(apply(array.votos, c(2,3), sum))
   array.homogeneo1 <- array(NA, dim(array.votos))
   array.homogeneo2 <- array(NA, dim(array.votos))
-
+  
   for (ii in 1L:dim(array.homogeneo1)[3L]){
     for (jj in 1L:dim(array.homogeneo1)[1L]){
       array.homogeneo1[jj, , ii] <- filas[ii, jj] * mt.prop1[jj, ]
@@ -1305,11 +1323,11 @@ HET_joint <- function(array.votos){
       array.homogeneo2[, jj, ii] <- columnas[ii, jj] * mt.prop2[jj, ]
     }
   }
-
+  
   HETe1 <- 100*(0.5*sum(abs(array.homogeneo1 - array.votos)))/sum(array.votos)
   HETe2 <- 100*(0.5*sum(abs(array.homogeneo2 - array.votos)))/sum(array.votos)
   HETe <- (HETe1 + HETe2)/2
-
+  
   output <- list("HETe" = HETe, "HETe1" = HETe1, "HETe2" = HETe2)
   return(output)
 }

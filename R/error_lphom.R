@@ -8,8 +8,8 @@
 #'
 #'
 #' @param lphom.object An object output of the **lphom()** function.
-#' @param upper.alfa Upper bound that will not exceed by the EI estimate with a confidence 1 - alpha. By default, 0.10.
-#' @param show.plot TRUE/FALSE. Indicates whether the graphical representation describing the relationship between EI and HETe estimated by simulation for the election under study should be displayed as a side-effect. By default, TRUE.
+#' @param upper.alfa Upper bound that will not be exceed by the EI estimate with a confidence 1 - alpha. By default, 0.10.
+#' @param show.plot TRUE/FALSE. Indicates whether the plot showing the relationship between EI and HETe estimated by simulation for the election under study should be displayed as a side-effect. By default, TRUE.
 #' @param num.d Number maximum of different disturbances, `d`, to be initially considered. Positive integer greater than or equal to 5. By default, 11.
 #' @param B Integer that determines the number of simulations to be performed for each disturbance value. By default, 30.
 #'
@@ -24,6 +24,7 @@
 #'    \item{TMs.estimate}{ Array with the estimated transfer matrices associated with each scenario.}
 #'
 #' @note ggplot2 is needed to be installed for this function to work.
+#' @note See equation (12) in Romero et al. (2020) for a definition of the EI index.
 #' @export
 # @import ggplot2
 #'
@@ -45,8 +46,8 @@ error_lphom <- function(lphom.object, upper.alfa = 0.10,
     stop("Package ggplot2 needed for this function to work. Please install it.",
          call. = FALSE)
   }
-  if(class(lphom.object) != "lphom"){
-    stop("'lphom.object' must be output from 'lphom'")
+  if(class(lphom.object)[1] != "lphom"){
+    stop("'lphom.object' must be output from 'lphom()'")
   }
   HETe <- EI <- medias <- maximos <- NULL
   if (upper.alfa > 0.5 | upper.alfa < 0)

@@ -7,7 +7,7 @@
 lclphom(
   votes_election1,
   votes_election2,
-  new_and_exit_voters = c("regular", "raw", "simultaneous", "full", "gold"),
+  new_and_exit_voters = c("raw", "regular", "simultaneous", "full", "gold"),
   structural_zeros = NULL,
   iter.max = 1000,
   uniform = TRUE,
@@ -21,18 +21,22 @@ lclphom(
 \item{votes_election1}{data.frame (or matrix) of order IxJ (likely of final order IxJ-1
 in \code{regular} and \code{raw} scenarios) with the votes gained by the \emph{J}
 political options competing on election 1 (or origin) in the \emph{I}
-territorial units considered.}
+territorial units considered. In general, the row marginals
+of the \emph{I} tables.}
 
 \item{votes_election2}{data.frame (or matrix) of order IxK (likely of final order IxK-1
 in \code{regular} and \code{raw} scenarios) with the votes gained by
 the \emph{K} political options competing on election 2 (or destination)
-in the \emph{I} territorial units considered.}
+in the \emph{I} territorial units considered. In general, the column marginals
+of the \emph{I} tables.}
 
 \item{new_and_exit_voters}{A character string indicating the level of information available
 regarding new entries and exits of the election censuses between the
 two elections. This argument captures the different options discussed
 on Section 3 of Romero et al. (2020). This argument admits five values:
-\code{regular}, \code{raw}, \code{simultaneous}, \code{full} and \code{gold}. Default, \code{regular}.}
+\code{raw}, \code{regular}, \code{simultaneous}, \code{full} and \code{gold}. Default, \code{raw}.
+The argument \code{simultaneous} should be used in a typical ecological inference
+problem.}
 
 \item{structural_zeros}{Default, NULL. A list of vectors of length two, indicating the election options
 for which no transfer of votes are allowed between election 1 and election 2.
@@ -46,15 +50,15 @@ number of iterations reaches \code{iter.max} or when there is no error reduction
 local unit between two consecutive iterations. By default, 1000.}
 
 \item{uniform}{A TRUE/FALSE value that indicates if census exits affects all the electoral options in a
-(relatively) similar fashion in each voting unit: equation (13) of Pavia and Romero (2021).
+(relatively) similar fashion in each voting unit: equation (13) of Pavia and Romero (2021a).
 Default, TRUE.}
 
 \item{distance.local}{A string argument that indicates whether the second step of the lphom_local algorithm
-should be performed in order to resolve potential indeterminacies of local solutions.
+should be performed to solve potential indeterminacies of local solutions.
 Default, \code{"abs"}.
-If \code{distance.local = "abs"} lphom_local selects in its the second step the matrix
+If \code{distance.local = "abs"} lphom_local selects in its second step the matrix
 closer to the temporary global solution under L_1 norm, among the first step compatible matrices.
-If \code{distance.local = "abs"} lphom_local selects in its the second step the matrix
+If \code{distance.local = "max"} lphom_local selects in its second step the matrix
 closer to the temporary global solution under L_Inf norm, among the first step compatible matrices.
 If \code{distance.local = "none"}, the second step of lphom_local is not performed.}
 
@@ -74,13 +78,13 @@ A list with the following components
 \item{VTM}{ A matrix of order JxK with the estimated percentages of row-standardized vote transitions from election 1 to election 2.}
 \item{VTM.votes}{ A matrix of order JxK with the estimated vote transitions from election 1 to election 2.}
 \item{OTM}{ A matrix of order KxJ with the estimated percentages of the origin of the votes obtained for the different options of election 2.}
-\item{HETe}{ The estimated heterogeneity index as defined in equation (15) of Pavia and Romero (2021).}
+\item{HETe}{ The estimated heterogeneity index as defined in equation (15) of Pavia and Romero (2021a).}
 \item{VTM.complete}{ A matrix of order J'xK' with the estimated proportions of row-standardized vote transitions from election 1 to election 2, including in \code{regular} and \code{raw} scenarios the row and the column corresponding to net_entries and net_exits even when they are really small, less than 1\% in all units.}
 \item{VTM.complete.votes}{ A matrix of order J'xK' with the estimated vote transitions from election 1 to election 2, including in \code{regular} and \code{raw} scenarios the row and the column corresponding to net_entries and net_exits even when they are really small, less than 1\% in all units.}
 \item{VTM.prop.units}{ An array of order J'xK'xI with the estimated proportions of vote transitions from election 1 to election 2 attained for each unit in the solution.}
 \item{VTM.votes.units}{ An array of order J'xK'xI with the estimated matrix of vote transitions from election 1 to election 2 attained for for each unit in the solution.}
-\item{VTM.complete.last.iter}{ A matrix of order J'xK' with the estimated proportions of vote transitions from election 1 to election 2, including in \code{regular} and \code{raw} scenarios the row and the column corresponding to net_entries and net_exits even when they are really small, less than 1\% in all units, corresponding to the final iteration}
-\item{VTM.sequence}{ Array of order J'xK'x(iter+1) (where \code{iter} is the efective number of iterations performed) of the intermediated estimated matrices corresponding to each iteration.}
+\item{VTM.complete.last.iter}{ A matrix of order J'xK' with the estimated proportions of vote transitions from election 1 to election 2, including in \code{regular} and \code{raw} scenarios the row and the column corresponding to net_entries and net_exits even when they are really small, less than 1\% in all units, corresponding to the final iteration.}
+\item{VTM.sequence}{ Array of order J'xK'x(iter+1) (where \code{iter} is the efective number of iterations performed) of the intermediate estimated matrices corresponding to each iteration.}
 \item{HETe.sequence}{ Numeric vector of length \code{iter+1} with the \code{HETe} coefficients corresponding to the matrices in \code{VTM.sequence}.}
 \item{VTM.prop.units.last.iter}{ An array of order J'xK'xI with the estimated proportions of vote transitions from election 1 to election 2 attained for each unit in the final iteration.}
 \item{VTM.votes.units.last.iter}{ An array of order J'xK'xI with the estimated matrix of vote transitions from election 1 to election 2 attained for each unit in the final iteration.}
@@ -89,18 +93,20 @@ A list with the following components
 \item{iter.units}{ A matrix of order Ix(iter+1) with the number of iteration corresponding to the solution selected for each unit
 in each iteration.}
 \item{errors}{ A vector of length I with the minimal error observed in the sequence for each unit. It corresponds to
-the error associated with the solution linked with \code{VTM_units.iter}.}
+the unit-error associated with the solution linked with either \code{VTM.prop.units} or \code{VTM.votes.units}.}
 \item{inputs}{ A list containing all the objects with the values used as arguments by the function.}
 \item{origin}{ A matrix with the final data used as votes of the origin election after taking into account the level of information available regarding to new entries and exits of the election censuses between the two elections.}
 \item{destination}{ A matrix with the final data used as votes of the origin election after taking into account the level of information available regarding to new entries and exits of the election censuses between the two elections.}
-\item{EHet}{ A matrix of order IxK measuring in each spatial unit a distance to the homogeneity hypothesis, that is, the differences under the homogeneity hypothesis between the actual recorded results and the expected results with the solution in each territorial unit for each option of election two.}
+\item{EHet}{ A matrix of order IxK measuring in each spatial unit a distance to the homogeneity hypothesis, that is, the differences under the homogeneity hypothesis between the actual recorded results and the expected results with the solution in each territorial unit for each option of election 2.}
 \item{solution_init}{ A list with the main outputs produced by \strong{lphom()}.}
 \itemize{
 \item{\code{VTM_init}:}{ A matrix of order JxK with the estimated percentages of vote transitions from election 1 to election 2 initially obtained by \strong{lphom()}.}
+\item{\code{VTM.votes_init}:}{ A matrix of order JxK with the estimated vote transitions from election 1 to election 2 initially obtained by \strong{lphom()}.}
 \item{\code{OTM_init}:}{ A matrix of order KxJ with the estimated percentages of the origin of the votes obtained for the different options of election 2 initially obtained by \strong{lphom()}.}
 \item{\code{HETe_init}:}{ The estimated heterogeneity index defined in equation (10) of Romero et al. (2020). }
-\item{\code{EHet_init}:}{ A matrix of order IxK measuring in each spatial unit the distance to the homogeneity hypothesis, that is, the differences under the homogeneity hypothesis between the actual recorded results and the expected results, using the \strong{lphom()} solution, in each territorial unit for each option of election two.}
+\item{\code{EHet_init}:}{ A matrix of order IxK measuring in each spatial unit the distance to the homogeneity hypothesis, that is, the differences under the homogeneity hypothesis between the actual recorded results and the expected results, using the \strong{lphom()} solution, in each territorial unit for each option of election 2.}
 \item{\code{VTM.complete_init}:}{ A matrix of order J'xK' with the estimated proportions of vote transitions from election 1 to election 2 initially obtained by \strong{lphom()}, including in \code{regular} and \code{raw} scenarios the row and the column corresponding to net_entries and net_exits even when they are really small, less than 1\% in all units.}
+\item{\code{VTM.complete.votes_init}:}{ A matrix of order J'xK' with the estimated vote transitions from election 1 to election 2 initially obtained by \strong{lphom()}, including in \code{regular} and \code{raw} scenarios the row and the column corresponding to net_entries and net_exits even when they are really small, less than 1\% in all units.}
 }
 }
 \description{
@@ -109,27 +115,31 @@ Estimates RxC vote transfer matrices (ecological contingency tables) with lclpho
 \details{
 Description of the \code{new_and_exit_voters} argument in more detail.
 \itemize{
-\item{\code{regular}: }{The default value. This argument accounts for the most plausible scenario.
-A scenario with two elections elapsed at least some months.
-In this scenario, (i) the column \emph{J} of  \code{votes_election1} corresponds to
-new young electors who have the right to vote for the first time and (ii)
+\item{\code{raw}: }{The default value. This argument accounts for the most plausible scenario when
+estimating vote transfer matrices: A scenario with two elections elapsed at least some
+months where only the raw election data recorded in the \emph{I} territorial units,
+in which the area under study is divided, are available.
+In this scenario, net exits (basically deaths) and net entries (basically
+new young voters) are estimated according to equation (7) of Romero et al. (2020).
+Constraints defined by equations (8) and (9) of Romero et al. (2020) and (13) of Pavia
+and Romero (2021a) are imposed.
+In this scenario, when net exits and/or net entries are negligible (such as between
+the first- and second-round of French Presidential elections), they are omitted in
+the outputs.}
+\item{\code{regular}: }{ For estimating vote transfer matrices, this value accounts for a scenario with
+two elections elapsed at least some months where (i) the column \emph{J} of \code{votes_election1}
+corresponds to new young electors who have the right to vote for the first time and (ii)
 net exits (basically a consequence of mortality), and eventually net entries,
-are computed according equation (7) of Romero et al. (2020), and (iii) we
-assume net exits affect equally all the first \emph{J-1} options of election 1,
-hence (8) and (9) constraints of Romero et al. (2020) are imposed.}
-\item{\code{raw}: }{This value accounts for a scenario with two elections where only the raw
-election data recorded in the \emph{I} territorial units, in which the area
-under study is divided, are available. In this scenario, net exits
-(basically deaths) and net entries (basically new young voters) are estimated
-according to equation (7) of Romero et al. (2020). Constraints defined by
-equations (8) and (9) of Romero et al. (2020) are imposed. In this scenario,
-when net exits and/or net entries are negligible (such as between the first- and
-second-round of French Presidential elections), they are omitted in the outputs.}
-\item{\code{simultaneous}: }{This value accounts for either a scenario with two simultaneous elections
-or a classical ecological inference problem. In this scenario, the sum by rows
-of \code{votes_election1} and \code{votes_election2} must coincide. Constraints
-defined by equations (8) and (9) of Romero et al. (2020) are not included
-in the model.}
+are computed according equation (7) of Romero et al. (2020), and (iii) within each unit
+it is assummed that net exits affect equally all the first \emph{J-1} options
+of election 1. Hence when \code{uniform = TRUE} equation (13) of Pavia and
+Romero (2021a) is applied. Constraints (8) and (9) of Romero et al. (2020)
+are imposed to start the process.}
+\item{\code{simultaneous}: }{ This is the value to be used in a classical ecological inference problems,
+such as for racial voting, and in a scenario with two simultaneous elections.
+In this scenario, the sum by rows of \code{votes_election1} and \code{votes_election2} must coincide.
+Constraints defined by equations (8) and (9) of Romero et al. (2020) and (13) of Pavia and
+Romero (2021a) are not included in the model.}
 \item{\code{full}: }{This value accounts for a scenario with two elections elapsed at least some
 months, where: (i) the column \emph{J-1} of votes_election1 totals new young
 electors that have the right to vote for the first time; (ii) the column \emph{J}
@@ -147,10 +157,10 @@ transition probability matrix}
 }
 }
 \examples{
-mt.lns <- lclphom(France2017P[, 1:8] , France2017P[, 9:12], new_and_exit_voters= "raw")
-mt.lns$VTM
-mt.lns$HETe
-mt.lns$solution_init$HETe_init
+mt.lc <- lclphom(France2017P[, 1:8] , France2017P[, 9:12], new_and_exit_voters= "raw")
+mt.lc$VTM
+mt.lc$HETe
+mt.lc$solution_init$HETe_init
 
 }
 \seealso{

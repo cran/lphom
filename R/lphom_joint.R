@@ -4,18 +4,18 @@
 #'
 #' @author Jose M. Pavia, \email{pavia@@uv.es}
 #' @author Rafael Romero \email{rromero@@eio.upv.es}
-#' @references Pavia, JM and Romero, R (2021). Symmetry estimating R×C vote transfer matrices from aggregate data, mimeo.
+#' @references Pavia, JM and Romero, R (2021). Symmetry estimating RxC vote transfer matrices from aggregate data, mimeo.
 #'
-#' @param votes_election1 data.frame (or matrix) of order IxJ with the votes gained by the *J*
-#'                        political options competing on election 1 (or origin) in the *I*
-#'                        territorial units considered. In general, the counts to be initially
-#'                        mapped to columns. The sum by rows of `votes_election1` and
+#' @param votes_election1 data.frame (or matrix) of order IxJ with the counts to be initially
+#'                        mapped to rows. When estimating vote transfer matrices, the votes gained by 
+#'                        the *J* political options competing on election 1 (or origin) in the *I*
+#'                        territorial units considered.  The sum by rows of `votes_election1` and
 #'                        `votes_election2` must coincide.
 #'
-#' @param votes_election2 data.frame (or matrix) of order IxK with the votes gained by
-#'                        the *K* political options competing on election 2 (or destination)
-#'                        in the *I* territorial units considered. In general, the counts to be
-#'                        initially mapped to columns. The sum by rows of `votes_election1` and
+#' @param votes_election2 data.frame (or matrix) of order IxK with the counts to be initially mapped 
+#'                        to columns. When estimating vote transfer matrices, the votes gained by
+#'                        the *K* political options competing on election 2 (or destination) in the *I* 
+#'                        territorial units considered. In general, The sum by rows of `votes_election1` and
 #'                        `votes_election2` must coincide.
 #'
 #' @param counts A TRUE/FALSE value that indicates whether the linked LP solution of votes must be approximate
@@ -111,8 +111,8 @@ lphom_joint <- function(votes_election1,
     dimnames(VTM2) <- list(names2, names1)
   }
 
-  eij <- votes_election2 - as.matrix(votes_election1) %*% VTM1
-  eik <- votes_election1 - as.matrix(votes_election2) %*% VTM2
+  eik <- votes_election2 - as.matrix(votes_election1) %*% VTM1
+  eij <- votes_election1 - as.matrix(votes_election2) %*% VTM2
 
  # e <- z[(JK+1):(JK+2*IK)]
  # e <- matrix(e,2,IK)
@@ -131,6 +131,8 @@ lphom_joint <- function(votes_election1,
   HETe <- 50*(sum(abs(eik)) + sum(abs(eij)))/sum(VTM.votos)
 
 
-  return(list("VTM.votes" = VTM.votos, "HETe" = HETe, "VTM12" = VTM1, "VTM21" = VTM2,
-              "EHet.12" = eik, "EHet.21" = eij, "inputs" = inputs))
+  output <- list("VTM.votes" = VTM.votos, "HETe" = HETe, "VTM12" = VTM1, "VTM21" = VTM2,
+              "EHet.12" = eik, "EHet.21" = eij, "inputs" = inputs)
+  class(output) <- c("lphom_joint", "ei_joint", "lphom")
+  return(output)
 }

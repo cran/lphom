@@ -15,16 +15,16 @@ nslphom_dual(
 )
 }
 \arguments{
-\item{votes_election1}{data.frame (or matrix) of order IxJ with the votes gained by the \emph{J}
-political options competing on election 1 (or origin) in the \emph{I}
-territorial units considered. In general, the counts to be initially
-mapped to columns. The sum by rows of \code{votes_election1} and
+\item{votes_election1}{data.frame (or matrix) of order IxJ with the counts to be initially
+mapped to rows. When estimating vote transfer matrices, the votes gained by
+the \emph{J} political options competing on election 1 (or origin) in the \emph{I}
+territorial units considered.  The sum by rows of \code{votes_election1} and
 \code{votes_election2} must coincide.}
 
-\item{votes_election2}{data.frame (or matrix) of order IxK with the votes gained by
-the \emph{K} political options competing on election 2 (or destination)
-in the \emph{I} territorial units considered. In general, the counts to be
-initially mapped to columns. The sum by rows of \code{votes_election1} and
+\item{votes_election2}{data.frame (or matrix) of order IxK with the counts to be initially mapped
+to columns. When estimating vote transfer matrices, the votes gained by
+the \emph{K} political options competing on election 2 (or destination) in the \emph{I}
+territorial units considered. In general, The sum by rows of \code{votes_election1} and
 \code{votes_election2} must coincide.}
 
 \item{iter.max}{Maximum number of iterations to be performed in each dual linear program.
@@ -48,7 +48,7 @@ solving the corresponding Integer Linear Program. Default, FALSE.}
 
 \item{tol}{Maximum deviation allowed between two consecutive iterations. The process ends when the maximum
 variation between two proportions for the estimation of the transfer matrix between two consecutive
-iterations is less than \code{tol} or the maximum number of iterations has been reached. By default, 0.00001.}
+iterations is less than \code{tol} or the maximum number of iterations, \code{iter.max}, has been reached. By default, 0.00001.}
 }
 \value{
 A list with the following components

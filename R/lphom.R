@@ -9,18 +9,22 @@
 #' @param votes_election1 data.frame (or matrix) of order IxJ (likely of final order IxJ-1
 #'                        in `regular` and `raw` scenarios) with the votes gained by the *J*
 #'                        political options competing on election 1 (or origin) in the *I*
-#'                        territorial units considered.
+#'                        territorial units considered. In general, the row marginals 
+#'                        of the *I* tables.
 #'
 #' @param votes_election2 data.frame (or matrix) of order IxK (likely of final order IxK-1
 #'                        in `regular` and `raw` scenarios) with the votes gained by
 #'                        the *K* political options competing on election 2 (or destination)
-#'                        in the *I* territorial units considered.
+#'                        in the *I* territorial units considered. In general, the column marginals 
+#'                        of the *I* tables.
 #'
 #' @param new_and_exit_voters A character string indicating the level of information available
 #'                            regarding new entries and exits of the election censuses between the
 #'                            two elections. This argument captures the different options discussed
 #'                            on Section 3 of Romero et al. (2020). This argument admits five values:
-#'                            `regular`, `raw`, `simultaneous`, `full` and `gold`. Default, `regular`.
+#'                            `raw`, `regular`, `simultaneous`, `full` and `gold`. Default, `raw`.
+#'                            The argument `simultaneous` should be used in a typical ecological inference 
+#'                            problem.
 #'
 #' @param structural_zeros Default NULL. A list of vectors of length two, indicating the election options
 #'                         for which no transfer of votes are allowed between election 1 and election 2.
@@ -42,27 +46,28 @@
 #'
 #' @details Description of the `new_and_exit_voters` argument in more detail.
 #' \itemize{
-#'  \item{`regular`: }{The default value. This argument accounts for the most plausible scenario.
-#'                    A scenario with two elections elapsed at least some months.
-#'                    In this scenario, (i) the column *J* of  `votes_election1` corresponds to
-#'                    new young electors who have the right to vote for the first time and (ii)
-#'                    net exits (basically a consequence of mortality), and eventually net entries,
-#'                    are computed according equation (7) of Romero et al. (2020), and (iii) we
-#'                    assume net exits affect equally all the first *J-1* options of election 1,
-#'                     hence (8) and (9) constraints of Romero et al. (2020) are imposed.}
-#'  \item{`raw`: }{This value accounts for a scenario with two elections where only the raw
-#'                 election data recorded in the *I* territorial units, in which the area
-#'                 under study is divided, are available. In this scenario, net exits
-#'                 (basically deaths) and net entries (basically new young voters) are estimated
-#'                 according to equation (7) of Romero et al. (2020). Constraints defined by
-#'                 equations (8) and (9) of Romero et al. (2020) are imposed. In this scenario,
-#'                 when net exits and/or net entries are negligible (such as between the first- and
-#'                 second-round of French Presidential elections), they are omitted in the outputs.}
-#'  \item{`simultaneous`: }{This value accounts for either a scenario with two simultaneous elections
-#'                 or a classical ecological inference problem. In this scenario, the sum by rows
-#'                 of `votes_election1` and `votes_election2` must coincide. Constraints
-#'                 defined by equations (8) and (9) of Romero et al. (2020) are not included
-#'                 in the model.}
+#'  \item{`raw`: }{The default value. This argument accounts for the most plausible scenario when
+#'                 estimating vote transfer matrices: A scenario with two elections elapsed at least some
+#'                 months where only the raw election data recorded in the *I* territorial units, 
+#'                 in which the area under study is divided, are available. 
+#'                 In this scenario, net exits (basically deaths) and net entries (basically 
+#'                 new young voters) are estimated according to equation (7) of Romero et al. (2020). 
+#'                 Constraints defined by equations (8) and (9) of Romero et al. (2020) are imposed. 
+#'                 In this scenario, when net exits and/or net entries are negligible (such as between 
+#'                 the first- and second-round of French Presidential elections), they are omitted in 
+#'                 the outputs.}
+#'  \item{`regular`: }{ For estimating vote transfer matrices, this value accounts for a scenario with 
+#'                 two elections elapsed at least some months where (i) the column *J* of `votes_election1` 
+#'                 corresponds to new young electors who have the right to vote for the first time and (ii)
+#'                 net exits (basically a consequence of mortality), and eventually net entries,
+#'                 are computed according equation (7) of Romero et al. (2020), and (iii) we
+#'                 assume net exits affect equally all the first *J-1* options of election 1,
+#'                 hence (8) and (9) constraints of Romero et al. (2020) are imposed.}
+#'  \item{`simultaneous`: }{ This is the value to be used in a classical ecological inference problems, 
+#'                such as for racial voting, and in a scenario with two simultaneous elections. 
+#'                In this scenario, the sum by rows of `votes_election1` and `votes_election2` must coincide. 
+#'                Constraints defined by equations (8) and (9) of Romero et al. (2020) are not included in 
+#'                the model.}
 #'  \item{`full`: }{This value accounts for a scenario with two elections elapsed at least some
 #'                months, where: (i) the column *J-1* of votes_election1 totals new young
 #'                electors that have the right to vote for the first time; (ii) the column *J*
@@ -90,7 +95,7 @@
 #'  \item{inputs}{ A list containing all the objects with the values used as arguments by the function.}
 #'  \item{origin}{ A matrix with the final data used as votes of the origin election after taking into account the level of information available regarding to new entries and exits of the election censuses between the two elections.}
 #'  \item{destination}{ A matrix with the final data used as votes of the origin election after taking into account the level of information available regarding to new entries and exits of the election censuses between the two elections.}
-#'  \item{EHet}{ A matrix of order IxK measuring in each spatial unit a distance to the homogeneity hypothesis. That is, the differences under the homogeneity hypothesis between the actual recorded results and the expected results in each territorial unit for each option of election two.}
+#'  \item{EHet}{ A matrix of order IxK measuring in each spatial unit a distance to the homogeneity hypothesis. That is, the differences under the homogeneity hypothesis between the actual recorded results and the expected results in each territorial unit for each option of election 2.}
 #' @export
 #'
 #'
@@ -105,13 +110,13 @@
 #
 lphom <- function(votes_election1,
                   votes_election2,
-                  new_and_exit_voters = c("regular", "raw", "simultaneous", "full", "gold"),
+                  new_and_exit_voters = c("raw", "regular", "simultaneous", "full", "gold"),
                   structural_zeros = NULL,
                   counts = FALSE,
                   verbose = FALSE,
                   solver = "lp_solve"){
 
-  # Loading package lpSolve
+# Loading package lpSolve
 #  if (!require(lpSolve)) install.packages("lpSolve", repos = "http://cran.rstudio.com")
 #  require(lpSolve)
 
@@ -125,6 +130,7 @@ lphom <- function(votes_election1,
   y = as.matrix(votes_election2)
   if (nrow(x) != nrow(y))
     stop('The number of spatial units is different in origin and destination.')
+  # new_and_exit_voters = match.arg(new_and_exit_voters)
   new_and_exit_voters = new_and_exit_voters[1]
   if (!(new_and_exit_voters %in% c("regular", "raw", "simultaneous", "full", "gold")))
     stop('Not allowed string for argument "new_and_exit_voters".
@@ -338,16 +344,17 @@ lphom <- function(votes_election1,
   }
   z = sol$solution
   pjk = matrix(z[1:JK], J, K, TRUE, dimnames = list(names1, names2))
+  e = z[(JK+1L):(JK+2L*IK)]
+  e = matrix(e, 2L, IK)
+  e = e[1L,] - e[2L,]
+  eik = t(matrix(e,K,I))
   if (counts){
     vjk <- pjk*colSums(x)
     vjk <- dec2counts(vjk, colSums(x), colSums(y))
     pjk <- vjk/rowSums(vjk)
     dimnames(pjk) <- list(names1, names2)
+    eik = y - x %*% pjk
   }
-  e = z[(JK+1L):(JK+2L*IK)]
-  e = matrix(e, 2L, IK)
-  e = e[1L,] - e[2L,]
-  eik = t(matrix(e,K,I))
   colnames(eik) = names2
   rownames(eik) = rownames(x)
   EHet = eik
@@ -360,15 +367,15 @@ lphom <- function(votes_election1,
   pjk.complete <- pjk
   vjk <- pjk*colSums(x)
   vjk.complete <- vjk
+  HIe = 100*sum(abs(eik))/sum(vjk.complete)
   if (new_and_exit_voters %in% c("regular", "raw")){
     if (net_entries & max(x[,ncol(x)]/rowSums(x)) < 0.01){
-      pjk = pjk[-J,]; eik = eik[-J,]; pkj = pkj[,-J]; vjk = vjk[,-J]
+      pjk = pjk[-J,]; eik = eik[-J,]; pkj = pkj[,-J]; vjk = vjk[-J,]
     }
     if (net_exits & max(y[,ncol(y)]/rowSums(y)) < 0.01){
-      pjk = pjk[,-K]; eik = eik[,-K]; pkj = pkj[-K,]; vjk = vjk[-K,]
+      pjk = pjk[,-K]; eik = eik[,-K]; pkj = pkj[-K,]; vjk = vjk[,-K]
     }
   }
-  HIe = 100*sum(abs(eik))/tt
   pjk = round(100*pjk, 2)
   pkj = round(100*pkj, 2)
   if (verbose){
@@ -378,9 +385,17 @@ lphom <- function(votes_election1,
     cat("\n\n Origin (%) of the votes obtained in Election 2\n\n")
     print(pkj)
   }
+  
+  # Caso de filas o columnas con cero votos
+  filas0 <- which(rowSums(vjk.complete) == 0)
+  colum0 <- which(colSums(vjk.complete) == 0)
+  pjk[filas0, ] <- 0
+  pjk.complete[filas0, ] <- 0
+  pkj[colum0, ] <- 0
+  
   output <- list("VTM" = pjk, "VTM.votes" = vjk, "OTM" = pkj, "HETe" = HIe,
                  "VTM.complete" = pjk.complete, "VTM.complete.votes" = vjk.complete,
                  "inputs" = inputs, "origin" = x, "destination" = y, "EHet" = EHet)
-  class(output) <- "lphom"
+  class(output) <- c("lphom", "ei_lp")
   return(output)
 }

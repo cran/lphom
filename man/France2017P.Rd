@@ -13,25 +13,25 @@ Data frame containing the provisional results of the first and second rounds of 
 \describe{
 \item{ABSTENTION}{Number of people abstaining (NonVoters) and voting either blank
 or null in the first-round of 2017 Presidential Election.}
-\item{MACRON}{Number of votes gained at a national level for Emmanuel Macron in the
+\item{MACRON}{Number of votes gained at a national level by Emmanuel Macron in the
 first-round of 2017 Presidential Election.}
-\item{LE_PEN}{Number of votes gained at a national level for Marine Le Pen in the
+\item{LE_PEN}{Number of votes gained at a national level by Marine Le Pen in the
 first-round of 2017 Presidential Election.}
-\item{FILLON}{Number of votes gained at a national level for Francois Fillon in the
+\item{FILLON}{Number of votes gained at a national level by Francois Fillon in the
 first-round of 2017 Presidential Election.}
-\item{MELENCHON}{Number of votes gained at a national level for Jean-Luc Melenchon in the
+\item{MELENCHON}{Number of votes gained at a national level bu Jean-Luc Melenchon in the
 first-round of 2017 Presidential Election.}
-\item{HAMON}{Number of votes gained at a national level for Benoit Hamon in the
+\item{HAMON}{Number of votes gained at a national level by Benoit Hamon in the
 first-round of 2017 Presidential Election.}
-\item{DUPONT}{Number of votes gained at a national level for Nicolas Dupont-Aignan in the
+\item{DUPONT}{Number of votes gained at a national level by Nicolas Dupont-Aignan in the
 first-round of 2017 Presidential Election.}
-\item{OTHERS}{Number of votes gained at a national level for the rest of candidates in the
+\item{OTHERS}{Number of votes gained at a national level by the rest of candidates in the
 first-round of 2017 Presidential Election.}
 \item{ABSTENTION2}{Number of people abstaining (NonVoters) in the second-round of 2017 Presidential Election.}
 \item{BLANK_NULL}{Number of people voting either blank or null in the second-round of 2017 Presidential Election.}
-\item{MACRON2}{Number of votes gained at a national level for Emmanuel Macron in the
+\item{MACRON2}{Number of votes gained at a national level by Emmanuel Macron in the
 second-round of 2017 Presidential Election}
-\item{LE_PEN2}{Number of votes gained at a national level for Marine Le Pen in the
+\item{LE_PEN2}{Number of votes gained at a national level by Marine Le Pen in the
 second-round of 2017 Presidential Election}
 }}
 

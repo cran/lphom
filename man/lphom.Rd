@@ -7,7 +7,7 @@
 lphom(
   votes_election1,
   votes_election2,
-  new_and_exit_voters = c("regular", "raw", "simultaneous", "full", "gold"),
+  new_and_exit_voters = c("raw", "regular", "simultaneous", "full", "gold"),
   structural_zeros = NULL,
   counts = FALSE,
   verbose = FALSE,
@@ -18,18 +18,22 @@ lphom(
 \item{votes_election1}{data.frame (or matrix) of order IxJ (likely of final order IxJ-1
 in \code{regular} and \code{raw} scenarios) with the votes gained by the \emph{J}
 political options competing on election 1 (or origin) in the \emph{I}
-territorial units considered.}
+territorial units considered. In general, the row marginals
+of the \emph{I} tables.}
 
 \item{votes_election2}{data.frame (or matrix) of order IxK (likely of final order IxK-1
 in \code{regular} and \code{raw} scenarios) with the votes gained by
 the \emph{K} political options competing on election 2 (or destination)
-in the \emph{I} territorial units considered.}
+in the \emph{I} territorial units considered. In general, the column marginals
+of the \emph{I} tables.}
 
 \item{new_and_exit_voters}{A character string indicating the level of information available
 regarding new entries and exits of the election censuses between the
 two elections. This argument captures the different options discussed
 on Section 3 of Romero et al. (2020). This argument admits five values:
-\code{regular}, \code{raw}, \code{simultaneous}, \code{full} and \code{gold}. Default, \code{regular}.}
+\code{raw}, \code{regular}, \code{simultaneous}, \code{full} and \code{gold}. Default, \code{raw}.
+The argument \code{simultaneous} should be used in a typical ecological inference
+problem.}
 
 \item{structural_zeros}{Default NULL. A list of vectors of length two, indicating the election options
 for which no transfer of votes are allowed between election 1 and election 2.
@@ -58,7 +62,7 @@ A list with the following components
 \item{inputs}{ A list containing all the objects with the values used as arguments by the function.}
 \item{origin}{ A matrix with the final data used as votes of the origin election after taking into account the level of information available regarding to new entries and exits of the election censuses between the two elections.}
 \item{destination}{ A matrix with the final data used as votes of the origin election after taking into account the level of information available regarding to new entries and exits of the election censuses between the two elections.}
-\item{EHet}{ A matrix of order IxK measuring in each spatial unit a distance to the homogeneity hypothesis. That is, the differences under the homogeneity hypothesis between the actual recorded results and the expected results in each territorial unit for each option of election two.}
+\item{EHet}{ A matrix of order IxK measuring in each spatial unit a distance to the homogeneity hypothesis. That is, the differences under the homogeneity hypothesis between the actual recorded results and the expected results in each territorial unit for each option of election 2.}
 }
 \description{
 Estimates RxC vote transfer matrices (ecological contingency tables) with lphom
@@ -66,27 +70,28 @@ Estimates RxC vote transfer matrices (ecological contingency tables) with lphom
 \details{
 Description of the \code{new_and_exit_voters} argument in more detail.
 \itemize{
-\item{\code{regular}: }{The default value. This argument accounts for the most plausible scenario.
-A scenario with two elections elapsed at least some months.
-In this scenario, (i) the column \emph{J} of  \code{votes_election1} corresponds to
-new young electors who have the right to vote for the first time and (ii)
+\item{\code{raw}: }{The default value. This argument accounts for the most plausible scenario when
+estimating vote transfer matrices: A scenario with two elections elapsed at least some
+months where only the raw election data recorded in the \emph{I} territorial units,
+in which the area under study is divided, are available.
+In this scenario, net exits (basically deaths) and net entries (basically
+new young voters) are estimated according to equation (7) of Romero et al. (2020).
+Constraints defined by equations (8) and (9) of Romero et al. (2020) are imposed.
+In this scenario, when net exits and/or net entries are negligible (such as between
+the first- and second-round of French Presidential elections), they are omitted in
+the outputs.}
+\item{\code{regular}: }{ For estimating vote transfer matrices, this value accounts for a scenario with
+two elections elapsed at least some months where (i) the column \emph{J} of \code{votes_election1}
+corresponds to new young electors who have the right to vote for the first time and (ii)
 net exits (basically a consequence of mortality), and eventually net entries,
 are computed according equation (7) of Romero et al. (2020), and (iii) we
 assume net exits affect equally all the first \emph{J-1} options of election 1,
 hence (8) and (9) constraints of Romero et al. (2020) are imposed.}
-\item{\code{raw}: }{This value accounts for a scenario with two elections where only the raw
-election data recorded in the \emph{I} territorial units, in which the area
-under study is divided, are available. In this scenario, net exits
-(basically deaths) and net entries (basically new young voters) are estimated
-according to equation (7) of Romero et al. (2020). Constraints defined by
-equations (8) and (9) of Romero et al. (2020) are imposed. In this scenario,
-when net exits and/or net entries are negligible (such as between the first- and
-second-round of French Presidential elections), they are omitted in the outputs.}
-\item{\code{simultaneous}: }{This value accounts for either a scenario with two simultaneous elections
-or a classical ecological inference problem. In this scenario, the sum by rows
-of \code{votes_election1} and \code{votes_election2} must coincide. Constraints
-defined by equations (8) and (9) of Romero et al. (2020) are not included
-in the model.}
+\item{\code{simultaneous}: }{ This is the value to be used in a classical ecological inference problems,
+such as for racial voting, and in a scenario with two simultaneous elections.
+In this scenario, the sum by rows of \code{votes_election1} and \code{votes_election2} must coincide.
+Constraints defined by equations (8) and (9) of Romero et al. (2020) are not included in
+the model.}
 \item{\code{full}: }{This value accounts for a scenario with two elections elapsed at least some
 months, where: (i) the column \emph{J-1} of votes_election1 totals new young
 electors that have the right to vote for the first time; (ii) the column \emph{J}

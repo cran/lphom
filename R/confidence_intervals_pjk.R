@@ -34,8 +34,8 @@ confidence_intervals_pjk <- function(lphom.object,
                                      level = 0.90,
                                      num.d = 11,
                                      B = 30) {
-  if(class(lphom.object) != "lphom"){
-    stop("'lphom.object' must be output from 'lphom'")
+  if(class(lphom.object)[1] != "lphom"){
+    stop("'lphom.object' must be output from 'lphom()'")
   }
   if (level > 1 | level < 0)
     stop('level must be between 0 and 1')
