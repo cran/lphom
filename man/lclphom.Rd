@@ -12,9 +12,10 @@ lclphom(
   iter.max = 1000,
   uniform = TRUE,
   distance.local = c("abs", "max", "none"),
-  counts = FALSE,
+  integers = FALSE,
   solver = "lp_solve",
-  verbose = FALSE
+  verbose = FALSE,
+  ...
 )
 }
 \arguments{
@@ -62,7 +63,7 @@ If \code{distance.local = "max"} lphom_local selects in its second step the matr
 closer to the temporary global solution under L_Inf norm, among the first step compatible matrices.
 If \code{distance.local = "none"}, the second step of lphom_local is not performed.}
 
-\item{counts}{A TRUE/FALSE value that indicates whether the problem is solved in integer values (counts) in
+\item{integers}{A TRUE/FALSE value that indicates whether the problem is solved in integer values in
 each iteration, including zero (lphom) and local solutions. Initial LP matrices are
 approximate to the closest integer solution solving the corresponding Integer Linear Program.
 Default, FALSE.}
@@ -72,6 +73,8 @@ Default, FALSE.}
 
 \item{verbose}{A TRUE/FALSE value that indicates if the main outputs of the function should be
 printed on the screen. Default, FALSE.}
+
+\item{...}{Other arguments to be passed to the function. Not currently used.}
 }
 \value{
 A list with the following components

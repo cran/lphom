@@ -33,15 +33,17 @@
 #'                         entries are computed because the sum by rows of `votes_election1` and
 #'                         `votes_election2` does not coincide.
 #'
-#' @param counts A TRUE/FALSE value that indicates whether the linked LP solution of votes must be approximate
-#'               to the closest integer solution using ILP. Default, FALSE.
+#' @param integers A TRUE/FALSE value that indicates whether the LP solution of counts (votes) must be approximate
+#'                 to the closest integer solution using ILP to generate the final solution. Default, FALSE.
 #'
 #' @param verbose A TRUE/FALSE value that indicates if the main outputs of the function should be
 #'                printed on the screen. Default, FALSE.
 #'
 #' @param solver A character string indicating the linear programming solver to be used, only
 #'               `lp_solve` and `symphony` are allowed. By default, `lp_solve`.
-
+#'
+#' @param ... Other arguments to be passed to the function. Not currently used.
+#'  
 
 #'
 #' @details Description of the `new_and_exit_voters` argument in more detail.
@@ -83,7 +85,7 @@
 #'               as in the above scenario apply but for both columns *K-1* and *K* of the vote
 #'               transition probability matrix}
 #' }
-#'
+#' 
 #' @return
 #' A list with the following components
 #'  \item{VTM}{ A matrix of order JxK with the estimated percentages of row-standardized vote transitions from election 1 to election 2.}
@@ -112,22 +114,27 @@ lphom <- function(votes_election1,
                   votes_election2,
                   new_and_exit_voters = c("raw", "regular", "simultaneous", "full", "gold"),
                   structural_zeros = NULL,
-                  counts = FALSE,
+                  integers = FALSE,
                   verbose = FALSE,
-                  solver = "lp_solve"){
+                  solver = "lp_solve",
+                  ...){
 
 # Loading package lpSolve
 #  if (!require(lpSolve)) install.packages("lpSolve", repos = "http://cran.rstudio.com")
 #  require(lpSolve)
 
+  argg <- c(as.list(environment()), list(...))
+  integers <- test_integers(argg)
+  
+  
   # inputs
   inputs <- list("votes_election1" = votes_election1, "votes_election2" = votes_election2,
                  "new_and_exit_voters" = new_and_exit_voters[1], "structural_zeros" = structural_zeros,
-                 "counts" = counts, "verbose" = verbose, "solver" = solver)
+                 "integers" = integers, "verbose" = verbose, "solver" = solver)
 
   # Data conditions
-  x = as.matrix(votes_election1)
-  y = as.matrix(votes_election2)
+  x <- as.matrix(votes_election1)
+  y <- as.matrix(votes_election2)
   if (nrow(x) != nrow(y))
     stop('The number of spatial units is different in origin and destination.')
   # new_and_exit_voters = match.arg(new_and_exit_voters)
@@ -348,7 +355,7 @@ lphom <- function(votes_election1,
   e = matrix(e, 2L, IK)
   e = e[1L,] - e[2L,]
   eik = t(matrix(e,K,I))
-  if (counts){
+  if (integers){
     vjk <- pjk*colSums(x)
     vjk <- dec2counts(vjk, colSums(x), colSums(y))
     pjk <- vjk/rowSums(vjk)

@@ -11,9 +11,10 @@ tslphom(
   structural_zeros = NULL,
   uniform = TRUE,
   distance.local = c("abs", "max", "none"),
-  counts = FALSE,
+  integers = FALSE,
   verbose = FALSE,
-  solver = "lp_solve"
+  solver = "lp_solve",
+  ...
 )
 }
 \arguments{
@@ -57,7 +58,7 @@ If \code{distance.local = "max"} lphom_local selects in its second step the matr
 closer to the temporary global solution under L_Inf norm, among the first step compatible matrices.
 If \code{distance.local = "none"}, the second step of lphom_local is not performed.}
 
-\item{counts}{A TRUE/FALSE value that indicates whether the problem is solved in integer values (counts),
+\item{integers}{A TRUE/FALSE value that indicates whether the problem is solved in integer values
 in both iterations, including iteration zero (lphom) and final (including unit) solutions. If TRUE, the LP matrices
 are approximated to the closest integer solution solving the corresponding Integer Linear Program.
 Default, FALSE.}
@@ -67,6 +68,8 @@ printed on the screen. Default, FALSE.}
 
 \item{solver}{A character string indicating the linear programming solver to be used, only
 \code{lp_solve} and \code{symphony} are allowed. By default, \code{lp_solve}.}
+
+\item{...}{Other arguments to be passed to the function. Not currently used.}
 }
 \value{
 A list with the following components

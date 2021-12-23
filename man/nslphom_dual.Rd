@@ -9,9 +9,10 @@ nslphom_dual(
   votes_election2,
   iter.max = 10,
   min.first = FALSE,
-  counts = FALSE,
+  integers = FALSE,
   solver = "lp_solve",
-  tol = 10^-5
+  tol = 10^-5,
+  ...
 )
 }
 \arguments{
@@ -38,7 +39,7 @@ If TRUE, the associated matrix to the instant in which the first decrease of \co
 is taken as solution. The process stops at that moment. In this last scenario
 (when \code{min.first = TRUE}), \code{iter.max} is is forced to be at least 100. Default, FALSE.}
 
-\item{counts}{A TRUE/FALSE value that indicates whether the problem is solved in integer values (counts) in
+\item{integers}{A TRUE/FALSE value that indicates whether the problem is solved in integer values in
 each iteration: zero (lphom) and intermediate and final (including unit) solutions.
 If TRUE, the initial LP matrices are approximated in each iteration to the closest integer solution
 solving the corresponding Integer Linear Program. Default, FALSE.}
@@ -49,6 +50,8 @@ solving the corresponding Integer Linear Program. Default, FALSE.}
 \item{tol}{Maximum deviation allowed between two consecutive iterations. The process ends when the maximum
 variation between two proportions for the estimation of the transfer matrix between two consecutive
 iterations is less than \code{tol} or the maximum number of iterations, \code{iter.max}, has been reached. By default, 0.00001.}
+
+\item{...}{Other arguments to be passed to the function. Not currently used.}
 }
 \value{
 A list with the following components

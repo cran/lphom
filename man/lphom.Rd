@@ -9,9 +9,10 @@ lphom(
   votes_election2,
   new_and_exit_voters = c("raw", "regular", "simultaneous", "full", "gold"),
   structural_zeros = NULL,
-  counts = FALSE,
+  integers = FALSE,
   verbose = FALSE,
-  solver = "lp_solve"
+  solver = "lp_solve",
+  ...
 )
 }
 \arguments{
@@ -42,14 +43,16 @@ lphom implicitly \verb{states structural_zeros = list(c(J, K))} in case exits an
 entries are computed because the sum by rows of \code{votes_election1} and
 \code{votes_election2} does not coincide.}
 
-\item{counts}{A TRUE/FALSE value that indicates whether the linked LP solution of votes must be approximate
-to the closest integer solution using ILP. Default, FALSE.}
+\item{integers}{A TRUE/FALSE value that indicates whether the LP solution of counts (votes) must be approximate
+to the closest integer solution using ILP to generate the final solution. Default, FALSE.}
 
 \item{verbose}{A TRUE/FALSE value that indicates if the main outputs of the function should be
 printed on the screen. Default, FALSE.}
 
 \item{solver}{A character string indicating the linear programming solver to be used, only
 \code{lp_solve} and \code{symphony} are allowed. By default, \code{lp_solve}.}
+
+\item{...}{Other arguments to be passed to the function. Not currently used.}
 }
 \value{
 A list with the following components

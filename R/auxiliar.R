@@ -137,17 +137,18 @@ simular_y_resumir <- function(lphom.object, d){
   array.votos <- simular_arrays_votos(lphom.object, d)
   resumenes <- HET_MT.votos_MT.prop_Y(array.votos)
   # Ajuste de decimales
-  resumenes$Y[,1L] <- resumenes$Y[,1L] + (rowSums(lphom.object$origin)-rowSums(resumenes$Y))
+  resumenes$Y[, 1L] <- resumenes$Y[, 1L] + (rowSums(lphom.object$origin) - rowSums(resumenes$Y))
   negativos <- resumenes$Y[, 1L] < 0
   origen <- lphom.object$origin
   origen[negativos, 1L] <- origen[negativos, 1L] - resumenes$Y[negativos, 1L]
   resumenes$Y[negativos, 1L] <- 0
+  resumenes$Y <- round(resumenes$Y)
   # Estimacion
   estimacion <- suppressMessages(lphom(votes_election1 = origen,
                                        votes_election2 = resumenes$Y,
-                                       new_and_exit_voters = "raw",
+                                       new_and_exit_voters = lphom.object$inputs$new_and_exit_voters,
                                        structural_zeros = ceros,
-                                       counts = lphom.object$inputs$counts,
+                                       integers = lphom.object$inputs$integers,
                                        verbose = FALSE,
                                        lphom.object$inputs$solver))
   estimacion$VTM.complete <- estimacion$VTM.complete[1L:nrow(resumenes$MT.prop),
@@ -1097,7 +1098,8 @@ dec2counts<-function(matriz, vector.fila, vector.columna){
                                                 mat = R,
                                                 dir = direc,
                                                 rhs= c0,
-                                                types = tipos)$solution[indices],
+                                                types = tipos,
+                                                time_limit = 10)$solution[indices],
                   length(vector.fila),
                   length(vector.columna), TRUE)
   return(output)
@@ -1332,3 +1334,19 @@ HET_joint <- function(array.votos){
   return(output)
 }
 
+# La funcion test_integers testea si es posible ajustar a soluciones enteras
+test_integers <- function(argg){
+  if ("counts" %in% names(argg)){
+    warning("Argument 'counts' deprecated, use 'integers' instead. 
+            The parameter 'integers' has been set equal to the parameter 'counts'.")
+    integers <- argg$counts
+  } else {
+    integers <- argg$integers
+  }  
+  if(integers){
+    condicion <- max(abs(argg[[1]]-round(argg[[1]]))) + max(abs(argg[[2]]-round(argg[[2]])))
+    if(condicion > 0)
+      stop("Integer solutions cannot be computed. At least a marginal value is decimal.")
+  }
+  return(integers)
+}

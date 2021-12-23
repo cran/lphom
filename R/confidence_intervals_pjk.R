@@ -24,9 +24,10 @@
 #' @seealso \code{\link{lphom}} \code{\link{error_lphom}}
 #'
 #' @examples
-#' mt.lphom <- lphom(France2017P[, 1:8], France2017P[, 9:12], "raw", NULL, FALSE)
-#' set.seed(533423)
-#' confidence_intervals_pjk(mt.lphom, level = 0.90, num.d = 5, B = 8)
+#' # Do not run
+#' # mt.lphom <- lphom(France2017P[, 1:8], France2017P[, 9:12], "raw", NULL, FALSE)
+#' # set.seed(533423)
+#' # confidence_intervals_pjk(mt.lphom, level = 0.90, num.d = 5, B = 8)
 #
 # @importFrom stats qnorm
 #

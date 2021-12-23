@@ -29,10 +29,10 @@
 #'                  is taken as solution. The process stops at that moment. In this last scenario
 #'                  (when `min.first = TRUE`), `iter.max` is is forced to be at least 100. Default, FALSE.
 #'
-#' @param counts A TRUE/FALSE value that indicates whether the problem is solved in integer values (counts) in
-#'               each iteration: zero (lphom) and intermediate and final (including unit) solutions.
-#'               If TRUE, the initial LP matrices are approximated in each iteration to the closest integer solution
-#'               solving the corresponding Integer Linear Program. Default, FALSE.
+#' @param integers A TRUE/FALSE value that indicates whether the problem is solved in integer values in
+#'                 each iteration: zero (lphom) and intermediate and final (including unit) solutions.
+#'                 If TRUE, the initial LP matrices are approximated in each iteration to the closest integer solution
+#'                 solving the corresponding Integer Linear Program. Default, FALSE.
 #'
 #' @param solver A character string indicating the linear programming solver to be used, only
 #'               `lp_solve` and `symphony` are allowed. By default, `lp_solve`.
@@ -41,6 +41,8 @@
 #'            variation between two proportions for the estimation of the transfer matrix between two consecutive
 #'            iterations is less than `tol` or the maximum number of iterations, `iter.max`, has been reached. By default, 0.00001.
 #'
+#' @param ... Other arguments to be passed to the function. Not currently used.
+#'  
 
 #' @return
 #' A list with the following components
@@ -90,20 +92,20 @@ nslphom_dual <- function(votes_election1,
                          votes_election2,
                          iter.max = 10,
                          min.first = FALSE,
-                         counts = FALSE,
+                         integers = FALSE,
                          solver = "lp_solve",
-                         tol = 10^-5){
+                         tol = 10^-5,
+                         ...){
 
-  inputs <- list("votes_election1" = votes_election1, "votes_election2" = votes_election2,
-                 "iter.max" = iter.max, "min.first" = min.first , "counts" = counts,
-                 "solver" = solver, "tol" = tol)
-
+  inputs <- c(as.list(environment()), list(...))
+  integers <- inputs$integers <- test_integers(argg = inputs)
+  
   lphom.object.12 <- nslphom(votes_election1, votes_election2, "simultaneous",
                              iter.max = iter.max, min.first = min.first,
-                             counts = counts, solver = solver, tol = tol)
+                             integers = integers, solver = solver, tol = tol)
   lphom.object.21 <- nslphom(votes_election2, votes_election1, "simultaneous",
                              iter.max = iter.max, min.first = min.first,
-                             counts = counts, solver = solver, tol = tol)
+                             integers = integers, solver = solver, tol = tol)
 
   votos.units.a <- (lphom.object.12$VTM.votes.units +
                       aperm(lphom.object.21$VTM.votes.units, c(2L, 1L, 3L)))/2
@@ -111,7 +113,7 @@ nslphom_dual <- function(votes_election1,
                       aperm(lphom.object.21$VTM.votes.units, c(2L, 1L, 3L))*lphom.object.21$HETe^-1)/
     (lphom.object.12$HETe^-1 + lphom.object.21$HETe^-1)
 
-  if (counts){
+  if (integers){
     for (i in 1L:nrow(lphom.object.12$origin)){
       votos.units.a[, , i] <- dec2counts(votos.units.a[, , i],
                                          lphom.object.12$origin[i,],

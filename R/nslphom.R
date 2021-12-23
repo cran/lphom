@@ -56,10 +56,10 @@
 #'                       closer to the temporary global solution under L_Inf norm, among the first step compatible matrices.
 #'                       If `distance.local = "none"`, the second step of lphom_local is not performed.
 #'
-#' @param counts A TRUE/FALSE value that indicates whether the problem is solved in integer values (counts) in
-#'               each iteration, including iteration zero (lphom) and intermediate and final local solutions.
-#'               If TRUE, the initial LP matrices are approximated in each iteration to the closest integer solution
-#'               solving the corresponding Integer Linear Program. Default, FALSE.
+#' @param integers A TRUE/FALSE value that indicates whether the problem is solved in integer values in
+#'                 each iteration, including iteration zero (lphom) and intermediate and final local solutions.
+#'                 If TRUE, the initial LP matrices are approximated in each iteration to the closest integer solution
+#'                 solving the corresponding Integer Linear Program. Default, FALSE.
 #'
 #' @param solver A character string indicating the linear programming solver to be used, only
 #'               `lp_solve` and `symphony` are allowed. By default, `lp_solve`.
@@ -73,6 +73,8 @@
 #'            variation between two proportions for the estimation of the transfer matrix between two consecutive
 #'            iterations is less than `tol` or the maximum number of iterations, `iter.max`, has been reached. By default, 0.00001.
 #'
+#' @param ... Other arguments to be passed to the function. Not currently used.
+#'  
 #' @details Description of the `new_and_exit_voters` argument in more detail.
 #' \itemize{
 #'  \item{`raw`: }{The default value. This argument accounts for the most plausible scenario when
@@ -170,11 +172,12 @@ nslphom <- function(votes_election1,
                     min.first = FALSE,
                     uniform = TRUE,
                     distance.local = c("abs", "max", "none"),
-                    counts = FALSE,
+                    integers = FALSE,
                     solver = "lp_solve",
                     burnin = 0,
                     verbose = FALSE,
-                    tol = 10^-5 ){
+                    tol = 10^-5,
+                    ...){
 
   if (iter.max < 0 | iter.max%%1 > 0)
     stop('iter.max must be a positive integer')
@@ -182,6 +185,9 @@ nslphom <- function(votes_election1,
     stop('Not allowed string for argument "distance.local".
          The only allowed strings for "distance.local" are "abs", "max" and "none".')
 
+  argg <- c(as.list(environment()), list(...))
+  integers <- test_integers(argg)
+  
   if (min.first){
     burnin <- 0L
     iter.max <- max(iter.max, 100L)
@@ -197,7 +203,7 @@ nslphom <- function(votes_election1,
   # Calculo de la solucion inicial
   lphom_inic <- lphom(votes_election1 = votes_election1, votes_election2 = votes_election2,
                       new_and_exit_voters = new_and_exit_voters, structural_zeros,
-                      counts = counts, verbose = FALSE, solver = solver)
+                      integers = integers, verbose = FALSE, solver = solver)
   lphom0 <- lphom_inic
 
   zeros <- determinar_zeros_estructurales(lphom_inic)
@@ -222,7 +228,7 @@ nslphom <- function(votes_election1,
     VTM_units <- votos_units <- array(NA, c(dim(lphom_inic$VTM.complete), nrow(lphom_inic$origin)))
     for (i in 1L:nrow(lphom_inic$origin)){
       VTM_units[, , i] <- lphom_unit(lphom.object = lphom0, iii = i, solver = solver)
-      if (counts){
+      if (integers){
         votos_units[, , i] <-dec2counts(VTM_units[, , i]*lphom_inic$origin[i, ],
                                         lphom_inic$origin[i,], lphom_inic$destination[i,])
         VTM_units[, , i] <- votos_units[, , i]/rowSums(votos_units[, , i])

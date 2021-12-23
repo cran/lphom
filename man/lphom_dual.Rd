@@ -7,8 +7,9 @@
 lphom_dual(
   votes_election1,
   votes_election2,
-  counts = FALSE,
-  solver = "lp_solve"
+  integers = FALSE,
+  solver = "lp_solve",
+  ...
 )
 }
 \arguments{
@@ -24,11 +25,13 @@ the \emph{K} political options competing on election 2 (or destination) in the \
 territorial units considered. In general, The sum by rows of \code{votes_election1} and
 \code{votes_election2} must coincide.}
 
-\item{counts}{A TRUE/FALSE value that indicates whether the linked LP solution of votes must be approximate
+\item{integers}{A TRUE/FALSE value that indicates whether the LP solution of counts (votes) must be approximate
 to the closest integer solution using ILP. Default, FALSE.}
 
 \item{solver}{A character string indicating the linear programming solver to be used, only
 \code{lp_solve} and \code{symphony} are allowed. By default, \code{lp_solve}.}
+
+\item{...}{Other arguments to be passed to the function. Not currently used.}
 }
 \value{
 A list with the following components

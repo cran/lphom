@@ -18,14 +18,17 @@
 #'                        territorial units considered. In general, The sum by rows of `votes_election1` and
 #'                        `votes_election2` must coincide.
 #'
-#' @param counts A TRUE/FALSE value that indicates whether the problem is solved in integer values (counts),
-#'               in both iterations: zero (lphom) and final (including unit) solutions. If TRUE, the LP matrices
-#'               are approximated to the closest integer solution solving the corresponding Integer Linear Program.
-#'               Default, FALSE.
+#' @param integers A TRUE/FALSE value that indicates whether the problem is solved in integer values 
+#'                 in both iterations: zero (lphom) and final (including unit) solutions. If TRUE, the LP matrices
+#'                 are approximated to the closest integer solution solving the corresponding Integer Linear Program.
+#'                 Default, FALSE.
 #'
 #' @param solver A character string indicating the linear programming solver to be used, only
 #'               `lp_solve` and `symphony` are allowed. By default, `lp_solve`.
 #'
+#' @param ... Other arguments to be passed to the function. Not currently used.
+#' 
+
 #' @return
 #' A list with the following components
 #'    \item{VTM.votes}{ A matrix of order JxK with the estimated cross-distribution of votes of elections 1 and 2.}
@@ -58,12 +61,16 @@
 
 tslphom_joint <- function(votes_election1,
                         votes_election2,
-                        counts = FALSE,
-                        solver = "lp_solve"){
-
+                        integers = FALSE,
+                        solver = "lp_solve",
+                        ...){
+  
+  argg <- c(as.list(environment()), list(...))
+  integers <- test_integers(argg)
+  
   # Calculo de la solucion inicial con lphom_joint
   lphom_inic <- lphom_joint(votes_election1 = votes_election1, votes_election2 = votes_election2,
-                            counts = counts, solver = solver)
+                            integers = integers, solver = solver)
 
   # Calculo de las soluciones locales
   VTM.votes_units <- array(NA, c(dim(lphom_inic$VTM.votes), nrow(votes_election1)))
@@ -73,7 +80,7 @@ tslphom_joint <- function(votes_election1,
                                              marginal_columna = votes_election2[i, ],
                                              solver = solver)
   }
-  if (counts){
+  if (integers){
     for (i in 1L:nrow(votes_election1)){
       VTM.votes_units[, , i] <- dec2counts(VTM.votes_units[, , i],
                                            votes_election1[i, ],

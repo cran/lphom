@@ -46,16 +46,19 @@
 #'                       closer to the temporary global solution under L_Inf norm, among the first step compatible matrices.
 #'                       If `distance.local = "none"`, the second step of lphom_local is not performed.
 #'
-#' @param counts A TRUE/FALSE value that indicates whether the problem is solved in integer values (counts),
-#'               in both iterations, including iteration zero (lphom) and final (including unit) solutions. If TRUE, the LP matrices
-#'               are approximated to the closest integer solution solving the corresponding Integer Linear Program.
-#'               Default, FALSE.
+#' @param integers A TRUE/FALSE value that indicates whether the problem is solved in integer values
+#'                 in both iterations, including iteration zero (lphom) and final (including unit) solutions. If TRUE, the LP matrices
+#'                 are approximated to the closest integer solution solving the corresponding Integer Linear Program.
+#'                 Default, FALSE.
 #'
 #' @param verbose A TRUE/FALSE value that indicates if the main outputs of the function should be
 #'                printed on the screen. Default, FALSE.
 #'
 #' @param solver A character string indicating the linear programming solver to be used, only
 #'               `lp_solve` and `symphony` are allowed. By default, `lp_solve`.
+#'
+#' @param ... Other arguments to be passed to the function. Not currently used.
+#'  
 
 #'
 #' @details Description of the `new_and_exit_voters` argument in more detail.
@@ -151,18 +154,22 @@ tslphom <- function(votes_election1,
                     structural_zeros = NULL,
                     uniform = TRUE,
                     distance.local = c("abs", "max", "none"),
-                    counts = FALSE,
+                    integers = FALSE,
                     verbose = FALSE,
-                    solver = "lp_solve"){
+                    solver = "lp_solve",
+                    ...){
+
+  argg <- c(as.list(environment()), list(...))
+  integers <- test_integers(argg)
+  
+  if (!(distance.local[1L] %in% c("abs", "max", "none")))
+    stop('Not allowed string for argument "distance.local".
+         The only allowed strings for "distance.local" are "abs", "max" and "none".')
 
   # Calculo de la solucion inicial
   lphom_inic <- lphom(votes_election1 = votes_election1, votes_election2 = votes_election2,
                       new_and_exit_voters = new_and_exit_voters, structural_zeros,
-                      counts = counts, verbose = FALSE, solver = solver)
-
-  if (!(distance.local[1L] %in% c("abs", "max", "none")))
-    stop('Not allowed string for argument "distance.local".
-         The only allowed strings for "distance.local" are "abs", "max" and "none".')
+                      integers = integers, verbose = FALSE, solver = solver)
 
   # Funcion local a aplicar
   lphom_unit <- lp_solver_local(uniform = uniform,
@@ -174,7 +181,7 @@ tslphom <- function(votes_election1,
 
   for (i in 1L:nrow(lphom_inic$origin)){
       VTM_units[, , i] <- lphom_unit(lphom.object = lphom_inic, iii = i, solver = solver)
-      if (counts){
+      if (integers){
         votos_units[, , i] <-dec2counts(VTM_units[, , i]*lphom_inic$origin[i, ],
                                         lphom_inic$origin[i,], lphom_inic$destination[i,])
         VTM_units[, , i] <- votos_units[, , i]/rowSums(votos_units[, , i])

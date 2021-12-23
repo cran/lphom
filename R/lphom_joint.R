@@ -18,11 +18,15 @@
 #'                        territorial units considered. In general, The sum by rows of `votes_election1` and
 #'                        `votes_election2` must coincide.
 #'
-#' @param counts A TRUE/FALSE value that indicates whether the linked LP solution of votes must be approximate
-#'               to the closest integer solution using ILP. Default, FALSE.
+#' @param integers A TRUE/FALSE value that indicates whether the LP solution of counts (votes) must be approximate
+#'                 to the closest integer solution using ILP. Default, FALSE.
 #'
 #' @param solver A character string indicating the linear programming solver to be used, only
 #'               `lp_solve` and `symphony` are allowed. By default, `lp_solve`.
+#'
+#' @param ... Other arguments to be passed to the function. Not currently used.
+#'  
+
 #' @return
 #' A list with the following components
 #'    \item{VTM.votes}{ A matrix of order JxK with the estimated cross-distribution of votes of elections 1 and 2.}
@@ -51,12 +55,12 @@
 
 lphom_joint <- function(votes_election1,
                         votes_election2,
-                        counts = FALSE,
-                        solver = "lp_solve"){
+                        integers = FALSE,
+                        solver = "lp_solve",
+                        ...){
 
-  inputs <- list("votes_election1" = votes_election1, "votes_election2" = votes_election2,
-                 "counts" = counts, "solver" = solver)
-
+  inputs <- c(as.list(environment()), list(...))
+  integers <- inputs$integers <- test_integers(argg = inputs)
 
   # Parameters
   I <- nrow(votes_election1);
@@ -103,7 +107,7 @@ lphom_joint <- function(votes_election1,
   VTM2 <- matrix(z[ncol(modelo12$a) + (1:JK)], K, J, TRUE, dimnames = list(names2, names1))
   VTM.votos <- VTM1 * colSums(votes_election1)
 
-  if (counts){
+  if (integers){
     VTM.votos <- dec2counts(VTM.votos, rowSums(VTM.votos), colSums(VTM.votos))
     VTM1 <- VTM.votos/rowSums(VTM.votos)
     VTM2 <- t(VTM.votos)/colSums(VTM.votos)

@@ -18,12 +18,15 @@
 #'                        territorial units considered. In general, The sum by rows of `votes_election1` and
 #'                        `votes_election2` must coincide.
 #'
-#' @param counts A TRUE/FALSE value that indicates whether the linked LP solution of votes must be approximate
-#'               to the closest integer solution using ILP. Default, FALSE.
+#' @param integers A TRUE/FALSE value that indicates whether the LP solution of counts (votes) must be approximate
+#'                 to the closest integer solution using ILP. Default, FALSE.
 #'
 #' @param solver A character string indicating the linear programming solver to be used, only
 #'               `lp_solve` and `symphony` are allowed. By default, `lp_solve`.
 #'
+#' @param ... Other arguments to be passed to the function. Not currently used.
+#'  
+
 #' @return
 #' A list with the following components
 #'    \item{VTM.votes.w}{ The matrix of order JxK with the estimated cross-distribution of votes of elections 1 and 2, attained weighting the two dual solutions using as weights the corresponding HTEe estimates.}
@@ -58,17 +61,18 @@
 
 lphom_dual <- function(votes_election1,
                        votes_election2,
-                       counts = FALSE,
-                       solver = "lp_solve"){
+                       integers = FALSE,
+                       solver = "lp_solve",
+                       ...){
 
-  inputs <- list("votes_election1" = votes_election1, "votes_election2" = votes_election2,
-                 "counts" = counts, "solver" = solver)
-
+  inputs <- c(as.list(environment()), list(...))
+  integers <- inputs$integers <- test_integers(argg = inputs)
+  
   # library(lphom)
   lphom.object.12 <- lphom(votes_election1, votes_election2, "simultaneous",
-                           counts = counts, solver = solver)
+                           integers = integers, solver = solver)
   lphom.object.21 <- lphom(votes_election2, votes_election1, "simultaneous",
-                           counts = counts, solver = solver)
+                           integers = integers, solver = solver)
   votos12 <- lphom.object.12$VTM.complete.votes
   votos21 <- t(lphom.object.21$VTM.complete.votes)
   VTM.votos <- (votos12 + votos21)/2
@@ -79,7 +83,7 @@ lphom_dual <- function(votes_election1,
   VTM1.weighted <- VTM.votos.weigthed/rowSums(VTM.votos.weigthed)
   VTM2.weighted <- t(VTM.votos.weigthed)/colSums(VTM.votos.weigthed)
 
-  if (counts){
+  if (integers){
     VTM.votos <- dec2counts(VTM.votos, rowSums(VTM.votos), colSums(VTM.votos))
     VTM.votos.weigthed <- dec2counts(VTM.votos.weigthed, rowSums(VTM.votos.weigthed),
                                      colSums(VTM.votos.weigthed))

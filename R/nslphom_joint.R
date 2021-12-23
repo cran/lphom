@@ -29,10 +29,10 @@
 #'                  is taken as solution. The process stops at that moment. In this last scenario
 #'                  (when `min.first = TRUE`), `iter.max` is is forced to be at least 100. Default, FALSE.
 #'
-#' @param counts A TRUE/FALSE value that indicates whether the problem is solved in integer values (counts) in
-#'               each iteration: zero (lphom) and intermediate and final (including unit) solutions.
-#'               If TRUE, the initial LP matrices are approximated in each iteration to the closest integer solution
-#'               solving the corresponding Integer Linear Program. Default, FALSE.
+#' @param integers A TRUE/FALSE value that indicates whether the problem is solved in integer values in
+#'                 each iteration: zero (lphom) and intermediate and final (including unit) solutions.
+#'                 If TRUE, the initial LP matrices are approximated in each iteration to the closest integer solution
+#'                 solving the corresponding Integer Linear Program. Default, FALSE.
 #'
 #' @param solver A character string indicating the linear programming solver to be used, only
 #'               `lp_solve` and `symphony` are allowed. By default, `lp_solve`.
@@ -41,6 +41,9 @@
 #'            variation between the estimated cross-distributions of votes between two consecutive
 #'            iterations is less than `tol` or the maximum number of iterations, `iter.max`, has been reached. By default, 0.001.
 #'
+#' @param ... Other arguments to be passed to the function. Not currently used.
+#'  
+
 #' @return
 #' A list with the following components
 #'    \item{VTM.votes}{ A matrix of order JxK with the estimated cross-distribution of votes of elections 1 and 2.}
@@ -77,13 +80,17 @@ nslphom_joint <- function(votes_election1,
                         votes_election2,
                         iter.max = 10,
                         min.first = FALSE,
-                        counts = FALSE,
+                        integers = FALSE,
                         solver = "lp_solve",
-                        tol = 0.001){
+                        tol = 0.001,
+                        ...){
 
+  inputs <- c(as.list(environment()), list(...))
+  integers <- inputs$integers <- test_integers(argg = inputs)
+  
   # Calculo de la solucion inicial con lphom_joint
   lphom_inic <- lphom_joint(votes_election1 = votes_election1, votes_election2 = votes_election2,
-                            counts = counts, solver = solver)
+                            integers = integers, solver = solver)
 
   if (min.first) iter.max <- max(100L, iter.max)
 
@@ -108,7 +115,7 @@ nslphom_joint <- function(votes_election1,
                                                     marginal_columna = votes_election2[i, ],
                                                     solver = solver)
     }
-    if (counts){
+    if (integers){
       for (i in 1L:nrow(votes_election1)){
         VTM.votes_units.iter[, , i] <- dec2counts(VTM.votes_units.iter[, , i],
                                                   votes_election1[i, ],
@@ -150,10 +157,10 @@ nslphom_joint <- function(votes_election1,
   inic <- lphom_inic[1:6]
   names(inic) <- paste0(names(inic), "_init")
 
-  inputs <- lphom_inic$inputs
-  inputs$iter.max <- iter.max
-  inputs$min.first <- min.first
-  inputs$tol <- tol
+#  inputs <- lphom_inic$inputs
+#  inputs$iter.max <- iter.max
+#  inputs$min.first <- min.first
+#  inputs$tol <- tol
 
   output <- list("VTM.votes" = VTM.votes, "HETe" = HETe.iter, "VTM12" =VTM1, "VTM21" = VTM2,
               "HETe.sequence" = HETe.sequence, "VTM.votes.sequence" = VTM.votes.sequence,
