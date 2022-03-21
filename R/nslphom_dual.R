@@ -35,8 +35,14 @@
 #'                 solving the corresponding Integer Linear Program. Default, FALSE.
 #'
 #' @param solver A character string indicating the linear programming solver to be used, only
-#'               `lp_solve` and `symphony` are allowed. By default, `lp_solve`.
+#'               `lp_solve` and `symphony` are allowed. By default, `lp_solve`. The package `Rsymphony`
+#'               needs to be installed for the option `symphony` to be used.
 #'
+#' @param integers.solver A character string indicating the linear programming solver to be used to approximate
+#'                        to the closest integer solution, only `symphony` and `lp_solve` are allowed.
+#'                        By default, `symphony`. The package `Rsymphony` needs to be installed for the option `symphony` 
+#'                        to be used. Only used when `integers = TRUE`. 
+#'                        
 #' @param tol Maximum deviation allowed between two consecutive iterations. The process ends when the maximum
 #'            variation between two proportions for the estimation of the transfer matrix between two consecutive
 #'            iterations is less than `tol` or the maximum number of iterations, `iter.max`, has been reached. By default, 0.00001.
@@ -83,7 +89,6 @@
 #' mt$HETe.w
 #'
 #
-#' @importFrom Rsymphony Rsymphony_solve_LP
 #' @importFrom lpSolve lp
 #
 
@@ -94,18 +99,27 @@ nslphom_dual <- function(votes_election1,
                          min.first = FALSE,
                          integers = FALSE,
                          solver = "lp_solve",
+                         integers.solver = "symphony",
                          tol = 10^-5,
                          ...){
 
   inputs <- c(as.list(environment()), list(...))
   integers <- inputs$integers <- test_integers(argg = inputs)
   
+  if (integers.solver == "lp_solve"){
+    dec2counts <- dec2counts_lp
+  } else {
+    dec2counts <- dec2counts_symphony
+  }
+  
   lphom.object.12 <- nslphom(votes_election1, votes_election2, "simultaneous",
                              iter.max = iter.max, min.first = min.first,
-                             integers = integers, solver = solver, tol = tol)
+                             integers = integers, solver = solver, 
+                             integers.solver = integers.solver, tol = tol)
   lphom.object.21 <- nslphom(votes_election2, votes_election1, "simultaneous",
                              iter.max = iter.max, min.first = min.first,
-                             integers = integers, solver = solver, tol = tol)
+                             integers = integers, solver = solver, 
+                             integers.solver = integers.solver, tol = tol)
 
   votos.units.a <- (lphom.object.12$VTM.votes.units +
                       aperm(lphom.object.21$VTM.votes.units, c(2L, 1L, 3L)))/2

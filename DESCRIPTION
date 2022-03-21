@@ -1,7 +1,7 @@
 Package: lphom
 Type: Package
 Title: Ecological Inference by Linear Programming under Homogeneity
-Version: 0.3.0-14
+Version: 0.3.1-1
 Authors@R: 
     c(person(given = "Jose M.",
            family = "Pavía",
@@ -21,15 +21,15 @@ Description: Provides a bunch of algorithms based on linear programming for esti
     Pavía and Romero (2021b) Symmetry estimating R×C vote transfer matrices from aggregate data.
 License: EPL | file LICENSE
 Encoding: UTF-8
-Imports: stats, lpSolve, Rsymphony (>= 0.1-30)
+Imports: stats, lpSolve
 Depends: R (>= 3.5.0)
-Suggests: ggplot2, scales
+Suggests: ggplot2, scales, Rsymphony (>= 0.1-30)
 LazyData: true
 RoxygenNote: 7.1.1
 NeedsCompilation: no
-Packaged: 2021-12-21 00:03:55 UTC; Jose M Pavia
+Packaged: 2022-03-21 08:37:47 UTC; Jose M Pavia
 Author: Jose M. Pavía [aut, cre] (<https://orcid.org/0000-0002-0129-726X>),
   Rafael Romero [aut]
 Maintainer: Jose M. Pavía <jose.m.pavia@uv.es>
 Repository: CRAN
-Date/Publication: 2021-12-23 08:20:06 UTC
+Date/Publication: 2022-03-21 08:50:02 UTC

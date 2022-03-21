@@ -6,14 +6,16 @@
 #' @author Rafael Romero \email{rromero@@eio.upv.es}
 #' @references Pavia, JM, and Romero, R (2021). Improving estimates accuracy of voter transitions. Two new algorithms for ecological inference based on linear programming. \doi{10.31124/advance.14716638.v1}.
 #'
-#' @param votes_election1 data.frame (or matrix) of order IxJ (likely of final order IxJ-1
-#'                        in `regular` and `raw` scenarios) with the votes gained by the *J*
+#' @param votes_election1 data.frame (or matrix) of order IxJ (likely of final order Ix(J-1)
+#'                        in `regular` and `raw` scenarios when net entries are
+#'                        estimated by the function) with the votes gained by the *J*
 #'                        political options competing on election 1 (or origin) in the *I*
 #'                        territorial units considered. In general, the row marginals 
 #'                        of the *I* tables.
 #'
-#' @param votes_election2 data.frame (or matrix) of order IxK (likely of final order IxK-1
-#'                        in `regular` and `raw` scenarios) with the votes gained by
+#' @param votes_election2 data.frame (or matrix) of order IxK (likely of final order Ix(K-1)
+#'                        in `regular` and `raw` scenarios  when net exits are
+#'                        estimated by the function) with the votes gained by
 #'                        the *K* political options competing on election 2 (or destination)
 #'                        in the *I* territorial units considered. In general, the column marginals 
 #'                        of the *I* tables.
@@ -29,7 +31,7 @@
 #' @param structural_zeros Default, NULL. A list of vectors of length two, indicating the election options
 #'                         for which no transfer of votes are allowed between election 1 and election 2.
 #'                         For instance, when new_and_exit_voters is set to `"regular"`,
-#'                         lphom implicitly `states structural_zeros = list(c(J, K))` in case exits and/or
+#'                         lphom implicitly states `structural_zeros = list(c(J, K))` in case exits and/or
 #'                         entries are computed because the sum by rows of `votes_election1` and
 #'                         `votes_election2` does not coincide.
 #'
@@ -62,8 +64,14 @@
 #'                 solving the corresponding Integer Linear Program. Default, FALSE.
 #'
 #' @param solver A character string indicating the linear programming solver to be used, only
-#'               `lp_solve` and `symphony` are allowed. By default, `lp_solve`.
+#'               `lp_solve` and `symphony` are allowed. By default, `lp_solve`. The package `Rsymphony`
+#'               needs to be installed for the option `symphony` to be used.  
 #'
+#' @param integers.solver A character string indicating the linear programming solver to be used to approximate
+#'                        to the closest integer solution, only `symphony` and `lp_solve` are allowed.
+#'                        By default, `symphony`. The package `Rsymphony` needs to be installed for the option `symphony` 
+#'                        to be used. Only used when `integers = TRUE`. 
+#'                        
 #' @param burnin Number of initial solutions to be discarded before determining the final solution. By default, 0.
 #'
 #' @param verbose A TRUE/FALSE value that indicates if the main outputs of the function should be
@@ -88,25 +96,25 @@
 #'                 In this scenario, when net exits and/or net entries are negligible (such as between 
 #'                 the first- and second-round of French Presidential elections), they are omitted in 
 #'                 the outputs.}
-#'  \item{`regular`: }{ For estimating vote transfer matrices, this value accounts for a scenario with 
+#'  \item{`regular`: }{For estimating vote transfer matrices, this value accounts for a scenario with 
 #'                 two elections elapsed at least some months where (i) the column *J* of `votes_election1` 
-#'                 corresponds to new young electors who have the right to vote for the first time and (ii)
-#'                 net exits (basically a consequence of mortality), and eventually net entries,
-#'                 are computed according equation (7) of Romero et al. (2020), and (iii) within each unit 
-#'                 it is assummed that net exits affect equally all the first *J-1* options 
-#'                 of election 1. Hence when `uniform = TRUE` equation (13) of Pavia and 
-#'                 Romero (2021a) is applied. Constraints (8) and (9) of Romero et al. (2020)
+#'                 corresponds to new young electors who have the right to vote for the first time, (ii)
+#'                 net exits (basically a consequence of mortality), and maybe other additional net entries, 
+#'                 are computed according equation (7) of Romero et al. (2020), and (iii), when 
+#'                 `uniform = TRUE`, within each unit it is assummed that net exits affect 
+#'                 equally all the first *J-1* options of election 1, i.e., equation (13) of Pavia 
+#'                 and Romero (2021a) is applied. Constraints (8) and (9) of Romero et al. (2020)
 #'                 are imposed to start the process.}
-#'  \item{`simultaneous`: }{ This is the value to be used in a classical ecological inference problems, 
+#'  \item{`simultaneous`: }{This is the value to be used in a classical ecological inference problems, 
 #'                such as for racial voting, and in a scenario with two simultaneous elections. 
 #'                In this scenario, the sum by rows of `votes_election1` and `votes_election2` must coincide. 
 #'                Constraints defined by equations (8) and (9) of Romero et al. (2020) and (13) of Pavia and 
 #'                Romero (2021a) are not included in the model.}
 #'  \item{`full`: }{This value accounts for a scenario with two elections elapsed at least some
-#'                months, where: (i) the column *J-1* of votes_election1 totals new young
+#'                months, where: (i) the column *J-1* of `votes_election1` totals new young
 #'                electors that have the right to vote for the first time; (ii) the column *J*
-#'                of votes_election1 measures new immigrants that have the right to vote; and
-#'                (iii) the column *K* of votes_election2 corresponds to total exits of the census
+#'                of `votes_election1` measures new immigrants that have the right to vote; and
+#'                (iii) the column *K* of `votes_election2` corresponds to total exits of the census
 #'                lists (due to death or emigration). In this scenario, the sum by rows of
 #'                `votes_election1` and `votes_election2` must agree and constraints (8)
 #'                and (9) of Romero et al. (2020) are imposed.}
@@ -160,7 +168,6 @@
 #' mt.ns$HETe
 #' mt.ns$solution_init$HETe_init
 #'
-#' @importFrom Rsymphony Rsymphony_solve_LP
 #' @importFrom lpSolve lp
 #'
 
@@ -174,6 +181,7 @@ nslphom <- function(votes_election1,
                     distance.local = c("abs", "max", "none"),
                     integers = FALSE,
                     solver = "lp_solve",
+                    integers.solver = "symphony",
                     burnin = 0,
                     verbose = FALSE,
                     tol = 10^-5,
@@ -184,9 +192,15 @@ nslphom <- function(votes_election1,
   if (!(distance.local[1] %in% c("abs", "max", "none")))
     stop('Not allowed string for argument "distance.local".
          The only allowed strings for "distance.local" are "abs", "max" and "none".')
-
+  
   argg <- c(as.list(environment()), list(...))
   integers <- test_integers(argg)
+  
+  if (integers.solver == "lp_solve"){
+    dec2counts <- dec2counts_lp
+  } else {
+    dec2counts <- dec2counts_symphony
+  }
   
   if (min.first){
     burnin <- 0L
@@ -203,7 +217,8 @@ nslphom <- function(votes_election1,
   # Calculo de la solucion inicial
   lphom_inic <- lphom(votes_election1 = votes_election1, votes_election2 = votes_election2,
                       new_and_exit_voters = new_and_exit_voters, structural_zeros,
-                      integers = integers, verbose = FALSE, solver = solver)
+                      integers = integers, verbose = FALSE, solver = solver,
+                      integers.solver = integers.solver)
   lphom0 <- lphom_inic
 
   zeros <- determinar_zeros_estructurales(lphom_inic)
@@ -315,7 +330,7 @@ nslphom <- function(votes_election1,
               "VTM.prop.units" = VTM_units, "VTM.votes.units" = votos_units, "zeros" = zeros,
               "iter" = iter, "iter.min" = burnin + iter.select, "EHet" = EHet,
               "inputs" = inputs, "origin" = lphom_inic$origin,
-              "destination" = lphom_inic$destination, "solution_init" = inic)
+              "destination" = lphom_inic$destination, "solution_init" = inic, "argg" = argg)
   class(output) <- c("nslphom", "ei_lp", "lphom")
   return(output)
 }

@@ -11,6 +11,7 @@ nslphom_joint(
   min.first = FALSE,
   integers = FALSE,
   solver = "lp_solve",
+  integers.solver = "symphony",
   tol = 0.001,
   ...
 )
@@ -45,7 +46,13 @@ If TRUE, the initial LP matrices are approximated in each iteration to the close
 solving the corresponding Integer Linear Program. Default, FALSE.}
 
 \item{solver}{A character string indicating the linear programming solver to be used, only
-\code{lp_solve} and \code{symphony} are allowed. By default, \code{lp_solve}.}
+\code{lp_solve} and \code{symphony} are allowed. By default, \code{lp_solve}. The package \code{Rsymphony}
+needs to be installed for the option \code{symphony} to be used.}
+
+\item{integers.solver}{A character string indicating the linear programming solver to be used to approximate
+to the closest integer solution, only \code{symphony} and \code{lp_solve} are allowed.
+By default, \code{symphony}. The package \code{Rsymphony} needs to be installed for the option \code{symphony}
+to be used. Only used when \code{integers = TRUE}.}
 
 \item{tol}{Maximum deviation allowed between two consecutive iterations. The process ends when the maximum
 variation between the estimated cross-distributions of votes between two consecutive
@@ -86,6 +93,7 @@ Pavia, JM and Romero, R (2021). Symmetry estimating RxC vote transfer matrices f
 
 Other linear programing ecological inference functions: 
 \code{\link{lclphom}()},
+\code{\link{lp_apriori}()},
 \code{\link{lphom_dual}()},
 \code{\link{lphom_joint}()},
 \code{\link{lphom}()},

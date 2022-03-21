@@ -35,8 +35,14 @@
 #'                 solving the corresponding Integer Linear Program. Default, FALSE.
 #'
 #' @param solver A character string indicating the linear programming solver to be used, only
-#'               `lp_solve` and `symphony` are allowed. By default, `lp_solve`.
+#'               `lp_solve` and `symphony` are allowed. By default, `lp_solve`. The package `Rsymphony`
+#'               needs to be installed for the option `symphony` to be used.  
 #'
+#' @param integers.solver A character string indicating the linear programming solver to be used to approximate
+#'                        to the closest integer solution, only `symphony` and `lp_solve` are allowed.
+#'                        By default, `symphony`. The package `Rsymphony` needs to be installed for the option `symphony` 
+#'                        to be used. Only used when `integers = TRUE`. 
+#'                        
 #' @param tol Maximum deviation allowed between two consecutive iterations. The process ends when the maximum
 #'            variation between the estimated cross-distributions of votes between two consecutive
 #'            iterations is less than `tol` or the maximum number of iterations, `iter.max`, has been reached. By default, 0.001.
@@ -72,7 +78,6 @@
 #' mt$VTM.votes
 #' mt$HETe
 #
-#' @importFrom Rsymphony Rsymphony_solve_LP
 #' @importFrom lpSolve lp
 #
 
@@ -82,15 +87,24 @@ nslphom_joint <- function(votes_election1,
                         min.first = FALSE,
                         integers = FALSE,
                         solver = "lp_solve",
+                        integers.solver = "symphony",
                         tol = 0.001,
                         ...){
 
   inputs <- c(as.list(environment()), list(...))
   integers <- inputs$integers <- test_integers(argg = inputs)
   
+  if (integers.solver == "lp_solve"){
+    dec2counts <- dec2counts_lp
+  } else {
+    dec2counts <- dec2counts_symphony
+  }
+  
   # Calculo de la solucion inicial con lphom_joint
-  lphom_inic <- lphom_joint(votes_election1 = votes_election1, votes_election2 = votes_election2,
-                            integers = integers, solver = solver)
+  lphom_inic <- lphom_joint(votes_election1 = votes_election1, 
+                            votes_election2 = votes_election2,
+                            integers = integers, solver = solver, 
+                            integers.solver =integers.solver)
 
   if (min.first) iter.max <- max(100L, iter.max)
 

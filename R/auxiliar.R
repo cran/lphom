@@ -1,4 +1,4 @@
-# @importFrom stats runif
+
 # La función **simular_vector_convexo()** simula un vector de proporciones de suma uno
 # (vector convexo) a partir de perturbar aleatoriamente un vector base de proporciones de
 # suma uno. La perturbación, basada en una distribución uniforme, está modulada por el
@@ -246,7 +246,6 @@ modelos_ajuste_estimacion_pjk <- function(matriz.errores, HETe0){
   return(output)
 }
 
-#' @importFrom Rsymphony Rsymphony_solve_LP
 #' @importFrom lpSolve lp
 # La función **calculo_MT_unidad()** calcula la matriz de transferencia que corresponde a una
 # unidad de votación. Para ello toma como base una matriz de transferencia global y tratando de
@@ -313,7 +312,6 @@ calculo_MT_unidad <- function(lphom.object, iii, solver){
 }
 
 
-#' @importFrom Rsymphony Rsymphony_solve_LP
 #' @importFrom lpSolve lp
 # La función **calculo_MT_unidad_abs()** calcula la matriz de transferencia que corresponde a una
 # unidad de votación. Para ello toma como base una matriz de transferencia global y tratando de
@@ -404,7 +402,6 @@ calculo_MT_unidad_abs <- function(lphom.object, iii, solver){
   return(sol2)
 }
 
-#' @importFrom Rsymphony Rsymphony_solve_LP
 #' @importFrom lpSolve lp
 # La función **calculo_MT_unidad_max()** calcula la matriz de transferencia que corresponde a una
 # unidad de votación. Para ello toma como base una matriz de transferencia global y tratando de
@@ -494,7 +491,6 @@ calculo_MT_unidad_max <- function(lphom.object, iii, solver){
   return(sol2)
 }
 
-#' @importFrom Rsymphony Rsymphony_solve_LP
 #' @importFrom lpSolve lp
 # La función **lphom_local()** calcula la matriz de transferencia que corresponde a una unidad de
 # votación. Para ello toma como base la matriz de transferencia global obtenida por **lphom()** y
@@ -653,7 +649,6 @@ lphom_local <- function(lphom.object, iii, solver){
 
 
 
-#' @importFrom Rsymphony Rsymphony_solve_LP
 #' @importFrom lpSolve lp
 # La función **lphom_local_abs()** calcula la matriz de transferencia que corresponde a una unidad de
 # votación. Para ello toma como base la matriz de transferencia global obtenida por **lphom()** y
@@ -838,7 +833,6 @@ lphom_local_abs <- function(lphom.object, iii, solver){
 }
 
 
-#' @importFrom Rsymphony Rsymphony_solve_LP
 #' @importFrom lpSolve lp
 # La función **lphom_local_max()** calcula la matriz de transferencia que corresponde a una unidad de
 # votación. Para ello toma como base la matriz de transferencia global obtenida por **lphom()** y
@@ -1047,8 +1041,8 @@ lp_solver_local <- function(uniform, distance.local){
 
 
 # La funcion dec2counts encuentra la matriz con entradas enteras más próxima de una
-# matriz de transferencia con entradas decimales.
-dec2counts<-function(matriz, vector.fila, vector.columna){
+# matriz de transferencia con entradas decimales, utilizando Rsymphony.
+dec2counts_symphony<-function(matriz, vector.fila, vector.columna){
   #
   # aprox.entera(matriz,vector.columna,vector.fila)
   #
@@ -1100,6 +1094,68 @@ dec2counts<-function(matriz, vector.fila, vector.columna){
                                                 rhs= c0,
                                                 types = tipos,
                                                 time_limit = 10)$solution[indices],
+                  length(vector.fila),
+                  length(vector.columna), TRUE)
+  return(output)
+}
+
+# La funcion dec2counts encuentra la matriz con entradas enteras más próxima de una
+# matriz de transferencia con entradas decimales, utilizando lpSolve.
+dec2counts_lp<-function(matriz, vector.fila, vector.columna){
+  #
+  # aprox.entera(matriz,vector.columna,vector.fila)
+  #
+  # Funcion para buscar la solucion entera mas proxima de una matriz con entradas
+  # no enteras debe cumplir restricciones de agregacion enteras por filas y columnas.
+  #
+  # INPUT:
+  #       matriz: matriz mxn inicial (no necesariamente cuadrada) con entradas no
+  #               necesariamente enteras que se busca mover lo menos posible
+  #               para una matriz entera verificando las agregaciones por filas
+  #               y columnas dadas por vector.fila y vector.columna.
+  #       vector.fila: vector de m componentes con lo que deben sumar las filas de
+  #                    matriz despues de la aproximacion entera.
+  #       vector.columna: vector de n componentes con lo que deben sumar las columnas
+  #                       de matriz despues de la aproximacion entera.
+  # OUTPUT:
+  #       Una matriz origen-destino de numeros enteros cumpliendo las restricciones
+  #       de suma de filas y columnas.
+  #
+  
+  # funcion objetivo
+  objetivo<-rep(c(1L, 1L, 0L),length(vector.fila)*length(vector.columna))
+  
+  # Restricciones de que los coeficientes de la matriz mas el valor positivo
+  # menos el valor negativo debe ser igual al entero mas proximo
+  R1 <- t(kronecker(diag(length(vector.fila)*length(vector.columna)),
+                    c(1L, -1L, 1L)))
+  c1 <- as.vector(t(matriz))
+  # Restricciones de suma de filas
+  R2 <- t(kronecker(diag(length(vector.fila)),rep(c(0L,0L,1L),length(vector.columna))))
+  c2 <- vector.fila
+  # Restricciones de suma de columnas
+  R3<- kronecker(t(rep(1L,length(vector.fila))),
+                 kronecker(diag(length(vector.columna)),t(c(0L,0L,1L))))
+  c3 <- vector.columna
+  # Conjunto de todas las restricciones
+  R <- rbind(R1,R2,R3)
+  c0 <- c(c1,c2,c3)
+  # Tipo de restricciones
+  direc <- rep("==",length(c0))
+  # Indices de las variables que han de ser enteras
+  #    indices <- which(rep(c(0,0,1),length(vector.fila)*length(vector.columna))==1)
+  tipos <- rep(c("C","C","I"),length(vector.fila)*length(vector.columna))
+  indices <- which(tipos=="I")
+  # Matriz de transferencia con valores enteros
+  
+  nsol <- suppressWarnings(lpSolve::lp('min', 
+                                      objetivo, 
+                                      R, 
+                                      direc, 
+                                      c0,
+                                      int.vec = indices))
+
+  output <-matrix(nsol$solution[indices],
                   length(vector.fila),
                   length(vector.columna), TRUE)
   return(output)
@@ -1338,13 +1394,15 @@ HET_joint <- function(array.votos){
 test_integers <- function(argg){
   if ("counts" %in% names(argg)){
     warning("Argument 'counts' deprecated, use 'integers' instead. 
-            The parameter 'integers' has been set equal to the parameter 'counts'.")
+            The parameter 'integers' has been set equal to the former parameter 'counts'.")
     integers <- argg$counts
   } else {
     integers <- argg$integers
   }  
   if(integers){
-    condicion <- max(abs(argg[[1]]-round(argg[[1]]))) + max(abs(argg[[2]]-round(argg[[2]])))
+    argg.1 <- as.matrix(argg$votes_election1)
+    argg.2 <- as.matrix(argg$votes_election2)
+    condicion <- max(abs(argg.1 - round(argg.1))) + max(abs(argg.2 - round(argg.2)))
     if(condicion > 0)
       stop("Integer solutions cannot be computed. At least a marginal value is decimal.")
   }

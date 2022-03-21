@@ -1,4 +1,4 @@
-#' Integer-adjusts outputs of the lphom-family functions
+#' Integer-adjusting of outputs of the lphom-family functions
 #'
 #' @description Takes as input an object generated with an algorithm of the lphom-family 
 #' (lphom, tslphom, nslphom, tslphom_dual, nslphom_joint, ....) and returns 
@@ -9,6 +9,10 @@
 #' @references ...
 #'
 #' @param x An object output of a lphom family algorithm
+#' @param solver A character string indicating the linear programming solver to be used to approximate
+#'               to the closest integer solution, only `symphony` and `lp_solve` are allowed.
+#'               By default, `symphony`. The package `Rsymphony` needs to be installed for the option `symphony` 
+#'               to be used.  
 #' @param ... Other arguments passed on the method. Not currently used. 
 #'                        
 #' @details
@@ -20,16 +24,16 @@
 #' @export
 #' 
 #' @examples
-#' mt.ns <- nslphom(France2017P[, 1:8] , France2017P[, 9:12], new_and_exit_voters= "raw")
-#' mt.ns <- adjust2integers(mt.ns)
+#' mt.ts <- tslphom(France2017P[, 1:8] , France2017P[, 9:12], new_and_exit_voters= "raw")
+#' mt.ts <- adjust2integers(mt.ts, solver = "lp_solve")
 #
 
-adjust2integers <- function(x, ...){
+adjust2integers <- function(x, solver = "symphony", ...){
   UseMethod("adjust2integers")
 }
   
 #' @export
-adjust2integers.lphom <- function(x, ...) 
+adjust2integers.lphom <- function(x, solver = "symphony", ...) 
 { 
   
   if (inherits(x, "ei_lp")){
@@ -42,45 +46,76 @@ adjust2integers.lphom <- function(x, ...)
     ajustar_con <- adjust2integers_default
   }
   
-  ajustar_con(x = x, ...)
+  ajustar_con(x = x, solver = solver, ...)
 }
 
 
-adjust2integers_default <- function(x, ...){
+adjust2integers_default <- function(x, solver = "symphony", ...){
   warning(paste0("adjust2integers does not know how to handle an object of class ", 
                 class(x), 
                 ".\n  It has been devised to deal with outputs of functions of the lphom-family."))
   
 }
 
-adjust2integers_lphom <- function(x, ...){
+adjust2integers_lphom <- function(x, solver = "symphony", ...){
   y <- x
-  y$VTM.complete.votes <- dec2counts(x$VTM.complete.votes, 
-                                     colSums(x$origin),
-                                     colSums(x$destination))
-  dimnames(y$VTM.complete.votes) <- dimnames(x$VTM.complete.votes)
-  y$VTM.votes <- y$VTM.complete.votes[1L:nrow(x$VTM.votes), 1L:ncol(x$VTM.votes)]
-  y$VTM.complete <- y$VTM.complete.votes/rowSums(y$VTM.complete.votes)
-  y$VTM <- round(100*y$VTM.complete[1L:nrow(x$VTM), 1L:ncol(x$VTM)], 2)
-  y$OTM <- t(y$VTM.complete.votes)/colSums(y$VTM.complete.votes)
-  y$OTM <- round(100*y$OTM[1L:nrow(x$OTM), 1L:ncol(x$OTM)], 2)
-  y$EHet <- x$destination - x$origin %*% y$VTM.complete
-  y$HETe <- 100*sum(abs(y$EHet))/sum(y$VTM.complete.votes)#
   
-  filas0 <- which(rowSums(y$VTM.votes) == 0)
-  colum0 <- which(colSums(y$VTM.votes) == 0)
-  y$VTM[filas0, ] <- 0
-  y$VTM.complete[filas0, ] <- 0
-  y$OTM[colum0, ] <- 0
+  if (y$inputs$solver == "lp_solve"){
+    dec2counts <- dec2counts_lp
+  } else {
+    dec2counts <- dec2counts_symphony
+  }
+  
+  if(class(y)[2] != "lp_apriori"){
+    y$VTM.complete.votes <- dec2counts(x$VTM.complete.votes, 
+                                       colSums(x$origin),
+                                       colSums(x$destination))
+    
+    dimnames(y$VTM.complete.votes) <- dimnames(x$VTM.complete.votes)
+    y$VTM.votes <- y$VTM.complete.votes[1L:nrow(x$VTM.votes), 1L:ncol(x$VTM.votes)]
+    y$VTM.complete <- y$VTM.complete.votes/rowSums(y$VTM.complete.votes)
+    y$VTM <- round(100*y$VTM.complete[1L:nrow(x$VTM), 1L:ncol(x$VTM)], 2)
+    y$OTM <- t(y$VTM.complete.votes)/colSums(y$VTM.complete.votes)
+    y$OTM <- round(100*y$OTM[1L:nrow(x$OTM), 1L:ncol(x$OTM)], 2)
+    y$EHet <- x$destination - x$origin %*% y$VTM.complete
+    y$HETe <- 100*sum(abs(y$EHet))/sum(y$VTM.complete.votes)#
+    
+    filas0 <- which(rowSums(y$VTM.votes) == 0)
+    colum0 <- which(colSums(y$VTM.votes) == 0)
+    y$VTM[filas0, ] <- 0
+    y$VTM.complete[filas0, ] <- 0
+    y$OTM[colum0, ] <- 0
+  } else {
+    y$VTM.complete.votes <- dec2counts(x$VTM.complete.votes, 
+                                       x$origin,
+                                       x$destination)
+    
+    dimnames(y$VTM.complete.votes) <- dimnames(x$VTM.complete.votes)
+    y$VTM.votes <- y$VTM.complete.votes[1L:nrow(x$VTM.votes), 1L:ncol(x$VTM.votes)]
+    y$VTM.complete <- y$VTM.complete.votes/rowSums(y$VTM.complete.votes)
+    y$VTM <- round(100*y$VTM.complete[1L:nrow(x$VTM), 1L:ncol(x$VTM)], 2)
+    y$OTM <- t(y$VTM.complete.votes)/colSums(y$VTM.complete.votes)
+    y$OTM <- round(100*y$OTM[1L:nrow(x$OTM), 1L:ncol(x$OTM)], 2)
+    filas0 <- which(rowSums(y$VTM.votes) == 0)
+    colum0 <- which(colSums(y$VTM.votes) == 0)
+    y$VTM[filas0, ] <- 0
+    y$VTM.complete[filas0, ] <- 0
+    y$OTM[colum0, ] <- 0
+  }
   
   return(y)
 }
 
-adjust2integers_ei_lp <- function(x, ...){
+adjust2integers_ei_lp <- function(x, solver = "symphony", ...){
   if (class(x)[1] == "lphom"){
-    adjust2integers_lphom(x = x, ...)
+    adjust2integers_lphom(x = x, solver = solver, ...)
   } else {
     y <- x
+    if (y$inputs$solver == "lp_solve"){
+      dec2counts <- dec2counts_lp
+    } else {
+      dec2counts <- dec2counts_symphony
+    }
     for (i in 1L:nrow(x$origin)){
       y$VTM.votes.units[, , i] <- dec2counts(x$VTM.votes.units[, , i],
                                              x$origin[i,], x$destination[i,])
@@ -105,8 +140,13 @@ adjust2integers_ei_lp <- function(x, ...){
   }
 }
 
-adjust2integers_lphom_dual <- function(x, ...){
+adjust2integers_lphom_dual <- function(x, solver = "symphony", ...){
   y <- x
+  if (y$inputs$solver == "lp_solve"){
+    dec2counts <- dec2counts_lp
+  } else {
+    dec2counts <- dec2counts_symphony
+  }
   y$VTM.votes.w <- dec2counts(x$VTM.votes.w, 
                               colSums(x$lphom.object.12$origin),
                               colSums(x$lphom.object.12$destination))
@@ -129,11 +169,16 @@ adjust2integers_lphom_dual <- function(x, ...){
   return(y)
 }
 
-adjust2integers_ei_dual <- function(x, ...){
+adjust2integers_ei_dual <- function(x, solver = "symphony", ...){
   if (class(x)[1] == "lphom_dual"){
-    adjust2integers_lphom_dual(x = x, ...)
+    adjust2integers_lphom_dual(x = x, solver= solver, ...)
   } else {
     y <- x
+    if (y$inputs$solver == "lp_solve"){
+      dec2counts <- dec2counts_lp
+    } else {
+      dec2counts <- dec2counts_symphony
+    }
     for (i in 1L:dim(x$VTM.votes.units.w)[3]){
       y$VTM.votes.units.w[, , i] <- dec2counts(x$VTM.votes.units.w[, , i],
                                                round(rowSums(x$VTM.votes.units.w[, , i])), 
@@ -162,8 +207,13 @@ adjust2integers_ei_dual <- function(x, ...){
 }
 
 
-adjust2integers_lphom_joint <- function(x, ...){
+adjust2integers_lphom_joint <- function(x, solver = "symphony", ...){
   y <- x
+  if (y$inputs$solver == "lp_solve"){
+    dec2counts <- dec2counts_lp
+  } else {
+    dec2counts <- dec2counts_symphony
+  }
   y$VTM.votes <- dec2counts(x$VTM.votes, 
                             colSums(x$inputs$votes_election1),
                             colSums(x$inputs$votes_election2))
@@ -179,12 +229,17 @@ adjust2integers_lphom_joint <- function(x, ...){
   return(y)
 }
 
-adjust2integers_ei_joint <- function(x, ...){
+adjust2integers_ei_joint <- function(x, solver = "symphony", ...){
   if (class(x)[1] == "lphom_joint"){
-    adjust2integers_lphom_joint(x = x, ...)
+    adjust2integers_lphom_joint(x = x, solver = solver, ...)
   } else {
     # invisible(validObject(x))
     y <- x
+    if (y$inputs$solver == "lp_solve"){
+      dec2counts <- dec2counts_lp
+    } else {
+      dec2counts <- dec2counts_symphony
+    }
     for (i in 1L:nrow(x$inputs$votes_election1)){
       y$VTM.votes.units[, , i] <- dec2counts(x$VTM.votes.units[, , i],
                                              x$inputs$votes_election1[i,], 

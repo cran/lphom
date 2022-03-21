@@ -2,12 +2,17 @@
 % Please edit documentation in R/adjust2integers.R
 \name{adjust2integers}
 \alias{adjust2integers}
-\title{Integer-adjusts outputs of the lphom-family functions}
+\title{Integer-adjusting of outputs of the lphom-family functions}
 \usage{
-adjust2integers(x, ...)
+adjust2integers(x, solver = "symphony", ...)
 }
 \arguments{
 \item{x}{An object output of a lphom family algorithm}
+
+\item{solver}{A character string indicating the linear programming solver to be used to approximate
+to the closest integer solution, only \code{symphony} and \code{lp_solve} are allowed.
+By default, \code{symphony}. The package \code{Rsymphony} needs to be installed for the option \code{symphony}
+to be used.}
 
 \item{...}{Other arguments passed on the method. Not currently used.}
 }
@@ -24,8 +29,8 @@ of counts updated to their closest integer matrices. The rest of main components
 The updating of the matrices is performed using integer linear programming after imposing all the row- and column-constraints.
 }
 \examples{
-mt.ns <- nslphom(France2017P[, 1:8] , France2017P[, 9:12], new_and_exit_voters= "raw")
-mt.ns <- adjust2integers(mt.ns)
+mt.ts <- tslphom(France2017P[, 1:8] , France2017P[, 9:12], new_and_exit_voters= "raw")
+mt.ts <- adjust2integers(mt.ts, solver = "lp_solve")
 }
 \references{
 ...

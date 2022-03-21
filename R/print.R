@@ -44,7 +44,7 @@ print.summary.lphom  <- function(x,
 {
  
   if (length(x) == 5){ 
-    tabla <- format(round(x$prop.matrix, digits), digits = digits)
+    tabla <- format(round(x$prop.matrix, digits), nsmall = digits)
     tabla <- apply(tabla, 2, as.character)
     rownames(tabla) <- rownames(x$prop.matrix)
   
@@ -59,11 +59,25 @@ print.summary.lphom  <- function(x,
     print(as.table(tabla))
     cat("Estimated Heterogeneity index (HETe):", x$HETe, "\n")
   
+  } else if (length(x) == 4){ 
+    tabla <- format(round(x$prop.matrix, digits), nsmall = digits)
+    tabla <- apply(tabla, 2, as.character)
+    rownames(tabla) <- rownames(x$prop.matrix)
+    
+    if (margins){
+      nr <- nrow(tabla)
+      tabla <- rbind(tabla, x$col.margins[1L:ncol(tabla)])
+      tabla <- cbind(tabla,  c(format(x$row.margins[1L:nr], justify = "right"), ""))
+    }
+    
+    cat("Adjusted row-standardized transfer matrix \n")
+    print(as.table(tabla))
+    
   } else {
 
-    tabla.w <- format(round(x$prop.matrix.w, digits), digits = digits)
+    tabla.w <- format(round(x$prop.matrix.w, digits), nsmall = digits)
     tabla.w <- apply(tabla.w, 2, as.character)
-    tabla.a <- format(round(x$prop.matrix.a, digits), digits = digits)
+    tabla.a <- format(round(x$prop.matrix.a, digits), nsmall = digits)
     tabla.a <- apply(tabla.a, 2, as.character)
     rownames(tabla.w) <- rownames(tabla.a) <- rownames(x$prop.matrix.w)
     

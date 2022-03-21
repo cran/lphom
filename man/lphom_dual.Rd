@@ -9,6 +9,7 @@ lphom_dual(
   votes_election2,
   integers = FALSE,
   solver = "lp_solve",
+  integers.solver = "symphony",
   ...
 )
 }
@@ -29,7 +30,13 @@ territorial units considered. In general, The sum by rows of \code{votes_electio
 to the closest integer solution using ILP. Default, FALSE.}
 
 \item{solver}{A character string indicating the linear programming solver to be used, only
-\code{lp_solve} and \code{symphony} are allowed. By default, \code{lp_solve}.}
+\code{lp_solve} and \code{symphony} are allowed. By default, \code{lp_solve}. The package \code{Rsymphony}
+needs to be installed for the option \code{symphony} to be used.}
+
+\item{integers.solver}{A character string indicating the linear programming solver to be used to approximate
+to the closest integer solution, only \code{symphony} and \code{lp_solve} are allowed.
+By default, \code{symphony}. The package \code{Rsymphony} needs to be installed for the option \code{symphony}
+to be used. Only used when \code{integers = TRUE}.}
 
 \item{...}{Other arguments to be passed to the function. Not currently used.}
 }
@@ -66,6 +73,7 @@ Pavia, JM and Romero, R (2021). Symmetry estimating R×C vote transfer matrices 
 
 Other linear programing ecological inference functions: 
 \code{\link{lclphom}()},
+\code{\link{lp_apriori}()},
 \code{\link{lphom_joint}()},
 \code{\link{lphom}()},
 \code{\link{nslphom_dual}()},

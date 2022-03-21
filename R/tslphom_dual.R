@@ -22,10 +22,16 @@
 #'                 in both iterations: zero (lphom) and final (including unit) solutions. If TRUE, the LP matrices
 #'                 are approximated to the closest integer solution solving the corresponding Integer Linear Program.
 #'                 Default, FALSE.
-#'
+#'                        
 #' @param solver A character string indicating the linear programming solver to be used, only
-#'               `lp_solve` and `symphony` are allowed. By default, `lp_solve`.
+#'               `lp_solve` and `symphony` are allowed. By default, `lp_solve`. The package `Rsymphony`
+#'               needs to be installed for the option `symphony` to be used.
 #'
+#' @param integers.solver A character string indicating the linear programming solver to be used to approximate
+#'                        to the closest integer solution, only `symphony` and `lp_solve` are allowed.
+#'                        By default, `symphony`. The package `Rsymphony` needs to be installed for the option `symphony` 
+#'                        to be used. Only used when `integers = TRUE`.
+#'                        
 #' @param ... Other arguments to be passed to the function. Not currently used.
 #'
 #' @return
@@ -67,7 +73,6 @@
 #' mt$HETe.w
 #'
 
-#' @importFrom Rsymphony Rsymphony_solve_LP
 #' @importFrom lpSolve lp
 #
 
@@ -76,18 +81,28 @@ tslphom_dual <- function(votes_election1,
                          votes_election2,
                          integers = FALSE,
                          solver = "lp_solve",
+                         integers.solver = "symphony",
                          ...){
   
   argg <- c(as.list(environment()), list(...))
   integers <- test_integers(argg)
   
+  if (integers.solver == "lp_solve"){
+    dec2counts <- dec2counts_lp
+  } else {
+    dec2counts <- dec2counts_symphony
+  }
+  
   inputs <- list("votes_election1" = votes_election1, "votes_election2" = votes_election2,
-                 "integers" = integers, "solver" = solver)
+                 "integers" = integers, "solver" = solver, 
+                 "integers.solver" = integers.solver)
 
   lphom.object.12 <- tslphom(votes_election1, votes_election2, "simultaneous",
-                           integers = integers, solver = solver)
+                           integers = integers, solver = solver,
+                           integers.solver = integers.solver)
   lphom.object.21 <- tslphom(votes_election2, votes_election1, "simultaneous",
-                           integers = integers, solver = solver)
+                           integers = integers, solver = solver,
+                           integers.solver = integers.solver)
 
   votos.units.a <- (lphom.object.12$VTM.votes.units +
                       aperm(lphom.object.21$VTM.votes.units, c(2, 1, 3)))/2

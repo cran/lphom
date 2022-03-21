@@ -12,18 +12,21 @@ lphom(
   integers = FALSE,
   verbose = FALSE,
   solver = "lp_solve",
+  integers.solver = "symphony",
   ...
 )
 }
 \arguments{
-\item{votes_election1}{data.frame (or matrix) of order IxJ (likely of final order IxJ-1
-in \code{regular} and \code{raw} scenarios) with the votes gained by the \emph{J}
+\item{votes_election1}{data.frame (or matrix) of order IxJ (likely of final order Ix(J-1)
+in \code{regular} and \code{raw} scenarios when net entries are
+estimated by the function) with the votes gained by the \emph{J}
 political options competing on election 1 (or origin) in the \emph{I}
 territorial units considered. In general, the row marginals
 of the \emph{I} tables.}
 
-\item{votes_election2}{data.frame (or matrix) of order IxK (likely of final order IxK-1
-in \code{regular} and \code{raw} scenarios) with the votes gained by
+\item{votes_election2}{data.frame (or matrix) of order IxK (likely of final order Ix(K-1)
+in \code{regular} and \code{raw} scenarios  when net exits are
+estimated by the function) with the votes gained by
 the \emph{K} political options competing on election 2 (or destination)
 in the \emph{I} territorial units considered. In general, the column marginals
 of the \emph{I} tables.}
@@ -39,7 +42,7 @@ problem.}
 \item{structural_zeros}{Default NULL. A list of vectors of length two, indicating the election options
 for which no transfer of votes are allowed between election 1 and election 2.
 For instance, when new_and_exit_voters is set to \code{"regular"},
-lphom implicitly \verb{states structural_zeros = list(c(J, K))} in case exits and/or
+lphom implicitly states \code{structural_zeros = list(c(J, K))} in case exits and/or
 entries are computed because the sum by rows of \code{votes_election1} and
 \code{votes_election2} does not coincide.}
 
@@ -50,7 +53,13 @@ to the closest integer solution using ILP to generate the final solution. Defaul
 printed on the screen. Default, FALSE.}
 
 \item{solver}{A character string indicating the linear programming solver to be used, only
-\code{lp_solve} and \code{symphony} are allowed. By default, \code{lp_solve}.}
+\code{lp_solve} and \code{symphony} are allowed. By default, \code{lp_solve}. The package \code{Rsymphony}
+needs to be installed for the option \code{symphony} to be used.}
+
+\item{integers.solver}{A character string indicating the linear programming solver to be used to approximate
+to the closest integer solution, only \code{symphony} and \code{lp_solve} are allowed.
+By default, \code{symphony}. The package \code{Rsymphony} needs to be installed for the option \code{symphony}
+to be used. Only used when \code{integers = TRUE}.}
 
 \item{...}{Other arguments to be passed to the function. Not currently used.}
 }
@@ -83,23 +92,23 @@ Constraints defined by equations (8) and (9) of Romero et al. (2020) are imposed
 In this scenario, when net exits and/or net entries are negligible (such as between
 the first- and second-round of French Presidential elections), they are omitted in
 the outputs.}
-\item{\code{regular}: }{ For estimating vote transfer matrices, this value accounts for a scenario with
+\item{\code{regular}: }{For estimating vote transfer matrices, this value accounts for a scenario with
 two elections elapsed at least some months where (i) the column \emph{J} of \code{votes_election1}
 corresponds to new young electors who have the right to vote for the first time and (ii)
-net exits (basically a consequence of mortality), and eventually net entries,
+net exits (basically a consequence of mortality), and maybe other additional net entries,
 are computed according equation (7) of Romero et al. (2020), and (iii) we
 assume net exits affect equally all the first \emph{J-1} options of election 1,
 hence (8) and (9) constraints of Romero et al. (2020) are imposed.}
-\item{\code{simultaneous}: }{ This is the value to be used in a classical ecological inference problems,
+\item{\code{simultaneous}: }{This is the value to be used in a classical ecological inference problems,
 such as for racial voting, and in a scenario with two simultaneous elections.
 In this scenario, the sum by rows of \code{votes_election1} and \code{votes_election2} must coincide.
 Constraints defined by equations (8) and (9) of Romero et al. (2020) are not included in
 the model.}
 \item{\code{full}: }{This value accounts for a scenario with two elections elapsed at least some
-months, where: (i) the column \emph{J-1} of votes_election1 totals new young
+months, where: (i) the column \emph{J-1} of \code{votes_election1} totals new young
 electors that have the right to vote for the first time; (ii) the column \emph{J}
-of votes_election1 measures new immigrants that have the right to vote; and
-(iii) the column \emph{K} of votes_election2 corresponds to total exits of the census
+of \code{votes_election1} measures new immigrants that have the right to vote; and
+(iii) the column \emph{K} of \code{votes_election2} corresponds to total exits of the census
 lists (due to death or emigration). In this scenario, the sum by rows of
 \code{votes_election1} and \code{votes_election2} must agree and constraints (8)
 and (9) of Romero et al. (2020) are imposed.}
@@ -122,6 +131,7 @@ Romero, R, Pavia, JM, Martin, J and Romero G (2020). Assessing uncertainty of vo
 
 Other linear programing ecological inference functions: 
 \code{\link{lclphom}()},
+\code{\link{lp_apriori}()},
 \code{\link{lphom_dual}()},
 \code{\link{lphom_joint}()},
 \code{\link{nslphom_dual}()},
