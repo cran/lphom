@@ -7,117 +7,206 @@
 lphom(
   votes_election1,
   votes_election2,
-  new_and_exit_voters = c("raw", "regular", "simultaneous", "full", "gold"),
+  new_and_exit_voters = c("raw", "regular", "ordinary", "enriched", "adjust1", "adjust2",
+    "simultaneous", "semifull", "full", "fullreverse", "gold"),
+  apriori = NULL,
+  lambda = 0.5,
+  uniform = TRUE,
   structural_zeros = NULL,
   integers = FALSE,
-  verbose = FALSE,
+  verbose = TRUE,
   solver = "lp_solve",
   integers.solver = "symphony",
   ...
 )
 }
 \arguments{
-\item{votes_election1}{data.frame (or matrix) of order IxJ (likely of final order Ix(J-1)
-in \code{regular} and \code{raw} scenarios when net entries are
-estimated by the function) with the votes gained by the \emph{J}
-political options competing on election 1 (or origin) in the \emph{I}
-territorial units considered. In general, the row marginals
-of the \emph{I} tables.}
+\item{votes_election1}{data.frame (or matrix) of order IxJ1 with the votes gained by
+(or the counts corresponding to) the J1 political options competing
+(available) on election 1 (or origin) in the I units considered.
+In general, the row marginals of the I tables corresponding
+to the units.}
 
-\item{votes_election2}{data.frame (or matrix) of order IxK (likely of final order Ix(K-1)
-in \code{regular} and \code{raw} scenarios  when net exits are
-estimated by the function) with the votes gained by
-the \emph{K} political options competing on election 2 (or destination)
-in the \emph{I} territorial units considered. In general, the column marginals
-of the \emph{I} tables.}
+\item{votes_election2}{data.frame (or matrix) of order IxK2
+with the votes gained by (or the counts corresponding to) the K2
+political options competing (available) on election 2 (or destination)
+in the I (territorial) units considered. In general, the column marginals
+of the I tables corresponding to the units.}
 
 \item{new_and_exit_voters}{A character string indicating the level of information available
-regarding new entries and exits of the election censuses between the
-two elections. This argument captures the different options discussed
-on Section 3 of Romero et al. (2020). This argument admits five values:
-\code{raw}, \code{regular}, \code{simultaneous}, \code{full} and \code{gold}. Default, \code{raw}.
-The argument \code{simultaneous} should be used in a typical ecological inference
-problem.}
+in \code{votes_election1} and \code{votes_election2} regarding new entries
+and exits of the election censuses between the two elections.
+This argument allows, in addition to the options discussed in Pavia
+(2023), three more options. This argument admits eleven different values:
+\code{raw}, \code{regular}, \code{ordinary}, \code{enriched}, \code{adjust1}, \code{adjust2},
+\code{simultaneous}, \code{semifull}, \code{full}, \code{fullreverse} and \code{gold}.
+Default, \code{raw}.}
 
-\item{structural_zeros}{Default NULL. A list of vectors of length two, indicating the election options
+\item{apriori}{data.frame (or matrix) of order J0xK0 with an initial estimate of the
+(row-standarized) global voter transition proportions/fractions, pjk0, between
+the first J0 (election) options of election 1 and the first K0 (election) options
+of election 2. This matrix can contain some missing values. When no a priori
+information is available \code{apriori} is a null object. Default, \code{NULL}.}
+
+\item{lambda}{A number between 0 and 1, informing the relative weight the user assigns to the
+\code{apriori} information. Setting \code{lambda = 0} is equivalent to not having a priori
+information (i.e., \code{apriori = NULL}). Default, \code{0.5}.}
+
+\item{uniform}{A \code{TRUE/FALSE} value that informs whether census exits affect all the electoral options
+in a (relatively) similar fashion. If \code{uniform = TRUE} typically at least one of the equations
+among equations (6) to (11) of Pavia (2022) is included in the underlying model.
+This parameter has never effect in \code{simultaneous} scenarios. It also has not impact
+in \code{raw} and \code{regular} scenarios when no net exits are estimated by the function
+from the provided information. Default, \code{TRUE}.}
+
+\item{structural_zeros}{Default \code{NULL}. A list of vectors of length two, indicating the election options
 for which no transfer of votes are allowed between election 1 and election 2.
-For instance, when new_and_exit_voters is set to \code{"regular"},
-lphom implicitly states \code{structural_zeros = list(c(J, K))} in case exits and/or
-entries are computed because the sum by rows of \code{votes_election1} and
-\code{votes_election2} does not coincide.}
+For instance, when new_and_exit_voters is set to \code{"semifull"},
+lphom implicitly states \code{structural_zeros = list(c(J1, K2))}.}
 
-\item{integers}{A TRUE/FALSE value that indicates whether the LP solution of counts (votes) must be approximate
-to the closest integer solution using ILP to generate the final solution. Default, FALSE.}
+\item{integers}{A \code{TRUE/FALSE} value that indicates whether the LP solution of counts (votes) must be
+approximate to the closest integer solution using ILP to generate the final solution.
+Default, \code{FALSE}.}
 
-\item{verbose}{A TRUE/FALSE value that indicates if the main outputs of the function should be
-printed on the screen. Default, FALSE.}
+\item{verbose}{A \code{TRUE/FALSE} value that indicates if a summary of the results of the computations performed
+to estimate net entries and exits should be printed on the screen. Default, \code{TRUE}.}
 
 \item{solver}{A character string indicating the linear programming solver to be used, only
 \code{lp_solve} and \code{symphony} are allowed. By default, \code{lp_solve}. The package \code{Rsymphony}
 needs to be installed for the option \code{symphony} to be used.}
 
-\item{integers.solver}{A character string indicating the linear programming solver to be used to approximate
-to the closest integer solution, only \code{symphony} and \code{lp_solve} are allowed.
-By default, \code{symphony}. The package \code{Rsymphony} needs to be installed for the option \code{symphony}
-to be used. Only used when \code{integers = TRUE}.}
+\item{integers.solver}{A character string indicating the linear programming solver to be used for
+approximating the LP solution to the closest integer solution.
+Only \code{symphony} and \code{lp_solve} are allowed. By default, \code{symphony}.
+The package \code{Rsymphony} needs to be installed for the
+option \code{symphony} to be used. Only used when \code{integers = TRUE}.}
 
 \item{...}{Other arguments to be passed to the function. Not currently used.}
 }
 \value{
 A list with the following components
-\item{VTM}{ A matrix of order JxK with the estimated percentages of row-standardized vote transitions from election 1 to election 2.}
-\item{VTM.votes}{ A matrix of order JxK with the estimated vote transitions from election 1 to election 2.}
+\item{VTM}{ A matrix of order J'xK' (where J'=J-1 or J and K'=K-1 or K) with the estimated percentages of row-standardized vote transitions from election 1 to election 2.
+In \code{raw}, \code{regular}, \code{ordinary} and \code{enriched} scenarios when the percentage of net entries is small, less than 1\% of the census in all units,
+net entries are omitted (i.e., the number of rows of \code{VTM} is equal to J1) even when estimates for net entries different from zero are obtained. Likewise, in the same scenarios when the percentage of net exits is small, less than 1\%
+of the census in all units, net exits are omitted (i.e., the number of rows of \code{VTM} is equal to K2) even when estimates for net exits different from zero are obtained.}
+\item{VTM.votes}{ A matrix of order J'xK' (where J'=J-1 or J and K'=K-1 or K) with the estimated vote transitions from election 1 to election 2.
+In \code{raw}, \code{regular}, \code{ordinary} and \code{enriched} scenarios when the percentage of net entries is small, less than 1\% of the census,
+net entries are omitted (i.e., J = J1) even when estimates for net entries different from zero are obtained. Likewise, in the same scenarios when the percentage of net exits is small, less than 1\%
+of the census, net exits are omitted (i.e., K = K2) even when estimates for net exits different from zero are obtained.}
 \item{OTM}{ A matrix of order KxJ with the estimated percentages of the origin of the votes obtained for the different options of election 2.}
 \item{HETe}{ The estimated heterogeneity index defined in equation (11) of Romero et al. (2020).}
-\item{VTM.complete}{ A matrix of order J'xK' with the estimated proportions of row-standardized vote transitions from election 1 to election 2, including in \code{regular} and \code{raw} scenarios the row and the column corresponding to net_entries and net_exits even when they are really small, less than 1\% in all units.}
-\item{VTM.complete.votes}{ A matrix of order J'xK' with the estimated vote transitions from election 1 to election 2, including in \code{regular} and \code{raw} scenarios the row and the column corresponding to net_entries and net_exits even when they are really small, less than 1\% in all units.}
+\item{VTM.complete}{ A matrix of order JxK with the estimated proportions of row-standardized vote transitions from election 1 to election 2.
+In \code{raw}, \code{regular}, \code{ordinary} and \code{enriched} scenarios, this matrix includes the row and the column corresponding to net entries
+and net exits (when they are present) even when they are really small, less than 1\%.}
+\item{VTM.complete.votes}{ A matrix of order JxK with the estimated vote transitions from election 1 to election 2.
+In \code{raw}, \code{regular}, \code{ordinary} and \code{enriched} scenarios, this matrix includes the row and the column corresponding to net entries
+and net exits (when they are present) even when they are really small, less than 1\%.}
+\item{deterministic.bounds}{ A list of two matrices of order JxK containing for each vote transition the lower and upper proportions allowed given the observed aggregates.}
 \item{inputs}{ A list containing all the objects with the values used as arguments by the function.}
 \item{origin}{ A matrix with the final data used as votes of the origin election after taking into account the level of information available regarding to new entries and exits of the election censuses between the two elections.}
 \item{destination}{ A matrix with the final data used as votes of the origin election after taking into account the level of information available regarding to new entries and exits of the election censuses between the two elections.}
 \item{EHet}{ A matrix of order IxK measuring in each spatial unit a distance to the homogeneity hypothesis. That is, the differences under the homogeneity hypothesis between the actual recorded results and the expected results in each territorial unit for each option of election 2.}
 }
 \description{
-Estimates RxC vote transfer matrices (ecological contingency tables) with lphom
+Estimates RxC (JxK) vote transfer matrices (ecological contingency tables) with lphom
 }
 \details{
 Description of the \code{new_and_exit_voters} argument in more detail.
 \itemize{
-\item{\code{raw}: }{The default value. This argument accounts for the most plausible scenario when
-estimating vote transfer matrices: A scenario with two elections elapsed at least some
-months where only the raw election data recorded in the \emph{I} territorial units,
-in which the area under study is divided, are available.
-In this scenario, net exits (basically deaths) and net entries (basically
-new young voters) are estimated according to equation (7) of Romero et al. (2020).
-Constraints defined by equations (8) and (9) of Romero et al. (2020) are imposed.
-In this scenario, when net exits and/or net entries are negligible (such as between
-the first- and second-round of French Presidential elections), they are omitted in
-the outputs.}
-\item{\code{regular}: }{For estimating vote transfer matrices, this value accounts for a scenario with
-two elections elapsed at least some months where (i) the column \emph{J} of \code{votes_election1}
-corresponds to new young electors who have the right to vote for the first time and (ii)
-net exits (basically a consequence of mortality), and maybe other additional net entries,
-are computed according equation (7) of Romero et al. (2020), and (iii) we
-assume net exits affect equally all the first \emph{J-1} options of election 1,
-hence (8) and (9) constraints of Romero et al. (2020) are imposed.}
-\item{\code{simultaneous}: }{This is the value to be used in a classical ecological inference problems,
-such as for racial voting, and in a scenario with two simultaneous elections.
+\item \code{raw}: The default value. This argument accounts for the most plausible scenario when
+estimating vote transfer matrices. A scenario with two elections elapsed at least
+some months where only the raw election data recorded in the I (territorial) units,
+in which the electoral space under study is divided, are available.
+In this scenario, net exits and net entries are estimated according to
+equation (7) of Romero et al. (2020). When both net entries and exits are no
+null, constraint (15) of Pavia (2023) applies. If there are net exits and \code{uniform = TRUE}
+either constraints (6) or (8) and (15) of Pavia (2023) are imposed. In this scenario,
+J could be equal to J1 or J1 + 1 and K equal to K2 or K2 + 1.
+\item \code{regular}: This value accounts for a scenario with
+two elections elapsed at least some months where (i) the column J1
+of \code{votes_election1} corresponds to new young electors who have the right
+to vote for the first time, (ii) net exits and maybe other additional
+net entries are computed according to equation (7) of Romero et al. (2020), and
+(iii) we can (or not) assume that net exits impact equally all the first J1 - 1
+options of election 1. When both net entries and exits are no null, constraints
+(13) and (15) of Pavia (2023) apply. If \code{uniform = TRUE} and there are net exits either
+constraints (8) or (11) of Pavia (2023), depending on whether there are or not net
+entries, are also imposed. In this scenario, J could be equal to J1 or J1 + 1 and
+K equal to K2 or K2 + 1.
+\item \code{ordinary}: This value accounts for a scenario
+with two elections elapsed at least some months where (i) the column K1
+of \code{votes_election2} corresponds to electors who died in the period between
+elections, (ii) net entries and maybe other additional net exits are
+computed according to equation (7) of Romero et al. (2020), and (iii) we can
+assume (or not) that exits impact equally all the J1 options of election 1.
+When both net entries and exits are no null, constraints (14) and
+(15) of Pavia (2023) apply and if \code{uniform = TRUE} either constraints
+(8) and (9) or, without net entries, (6) and (7) of Pavia (2023) are also imposed.
+In this scenario, J could be equal to J1 or J1 + 1 and K equal to K2 or K2 + 1.
+\item \code{enriched}: This value accounts for a scenario that somehow combine \code{regular} and
+\code{ordinary} scenarios. We consider two elections elapsed at least some months where
+(i) the column J1 of \code{votes_election1} corresponds to new young electors
+who have the right to vote for the first time, (ii) the column K2 of
+\code{votes_election2} corresponds to electors who died in the interperiod
+election, (iii) other (net) entries and (net) exits are computed according
+to equation (7) of Romero et al. (2020), and (iv) we can assume
+(or not) that exits impact equally all the J1 - 1 options of election 1.
+When both net entries and exits are no null, constraints (12) to
+(15) of Pavia (2023) apply and if \code{uniform = TRUE} constraints
+(10) and (11) of Pavia (2023) are also imposed. In this scenario, J could be equal
+to J1 or J1 + 1 and K equal to K2 or K2 + 1.
+\item \code{adjust1}: This value accounts for a scenario
+with two elections elapsed at least some months where the census in
+each of the I polling units of the first election (the row-sums of \code{votes_election1}) are
+proportionally adjusted to match the corresponding census of the polling units in the
+second election (the row-sums of \code{votes_election2}).
+If \code{integers = TRUE}, each row in \code{votes_election1} is proportionally adjusted to the closest integer
+vector whose sum is equal to the sum of the corresponding row in \code{votes_election2}.
+\item \code{adjust2}: This value accounts for a scenario
+with two elections elapsed at least some months where the census in
+each of the I polling units of the second election (the row-sums of \code{votes_election2})
+are proportionally adjusted to match the corresponding census of the polling units
+in the first election (the row-sums of \code{votes_election1}).
+If \code{integers = TRUE}, each row in \code{votes_election2} is adjusted to the closest integer
+vector whose sum is equal to the sum of the corresponding row in \code{votes_election1}.
+\item \code{simultaneous}: This is the value to be used in classical ecological inference problems,
+such as in ecological studies of racial voting, and in scenarios with two simultaneous elections.
 In this scenario, the sum by rows of \code{votes_election1} and \code{votes_election2} must coincide.
 Constraints defined by equations (8) and (9) of Romero et al. (2020) are not included in
-the model.}
-\item{\code{full}: }{This value accounts for a scenario with two elections elapsed at least some
-months, where: (i) the column \emph{J-1} of \code{votes_election1} totals new young
-electors that have the right to vote for the first time; (ii) the column \emph{J}
-of \code{votes_election1} measures new immigrants that have the right to vote; and
-(iii) the column \emph{K} of \code{votes_election2} corresponds to total exits of the census
+the model. In this case, the lphom function just implements the basic model defined,
+for instance, by equations (1) to (5) of Pavia (2024).
+\item \code{semifull}: This value accounts for a scenario with two elections elapsed at least some
+months, where: (i) the column J1 = J of \code{votes_election1} totals new
+electors (young and immigrants) that have the right to vote for the first time and
+(ii) the column K2 = K of \code{votes_election2} corresponds to total exits of the census
 lists (due to death or emigration). In this scenario, the sum by rows of
-\code{votes_election1} and \code{votes_election2} must agree and constraints (8)
-and (9) of Romero et al. (2020) are imposed.}
-\item{\code{gold}: }{This value accounts for a scenario similar to full, where total exits are
-separated out between exits due to emigration (column \emph{K-1} of \code{votes_election2})
-and death (column \emph{K} of \code{votes_election2}). In this scenario, the sum by rows
-of \code{votes_election1} and \code{votes_election2} must agree. The same restrictions
-as in the above scenario apply but for both columns \emph{K-1} and \emph{K} of the vote
-transition probability matrix}
+\code{votes_election1} and \code{votes_election2} must agree and constraint (15)
+of Pavia (2023) apply. Additionally, if \code{uniform = TRUE} constraints
+(8) of Pavia (2023) are also imposed.
+\item \code{full}: This value accounts for a scenario with two elections elapsed at least some
+months, where (i) the column J - 1 of \code{votes_election1} totals new young
+electors that have the right to vote for the first time, (ii) the column J (=J1)
+of \code{votes_election1} measures new immigrants that have the right to vote and
+(iii) the column K (=K2) of \code{votes_election2} corresponds to total exits of the census
+lists (due to death or emigration). In this scenario, the sum by rows of
+\code{votes_election1} and \code{votes_election2} must agree and constraints (13)
+and (15) of Pavia (2023) apply.  Additionally, if \code{uniform = TRUE} constraints
+(11) of Pavia (2023) are also imposed.
+\item \code{fullreverse}: This value is somehow the mirror version of \code{full}.
+It accounts for a scenario with two elections elapsed at least some
+months, where (i) the column J1 = J of \code{votes_election1} totals new
+electors (young and immigrants) that have the right to vote for the first time and
+(ii) where total exits are separated out between exits due to emigration
+(column K - 1 of \code{votes_election2}) and death (column K of \code{votes_election2}).
+In this scenario, the sum by rows of \code{votes_election1} and \code{votes_election2} must
+agree and constraints (14) and (15) of Pavia (2023) apply.
+Additionally, if \code{uniform = TRUE} constraints (8) and (9) of Pavia (2023) are also imposed.
+\item \code{gold}: This value accounts for a scenario similar to \code{full}, where total exits are
+separated out between exits due to emigration (column K - 1 of \code{votes_election2})
+and death (column K of \code{votes_election2}). In this scenario, the sum by rows
+of \code{votes_election1} and \code{votes_election2} must agree. Constraints (12) to
+(15) of Pavia (2023) apply and if \code{uniform = TRUE} constraints (10) and (11)
+of Pavia (2023) are also imposed.
 }
 }
 \examples{
@@ -127,7 +216,7 @@ lphom(France2017P[, 1:8] , France2017P[, 9:12], new_and_exit_voters= "raw")
 Romero, R, Pavia, JM, Martin, J and Romero G (2020). Assessing uncertainty of voter transitions estimated from aggregated data. Application to the 2017 French presidential election. \emph{Journal of Applied Statistics}, 47(13-15), 2711-2736. \doi{10.1080/02664763.2020.1804842}
 }
 \seealso{
-\code{\link{tslphom}} \code{\link{nslphom}} \code{\link{lclphom}}
+\code{\link{tslphom}} \code{\link{nslphom}} \code{\link{lclphom}} \code{\link{rslphom}}
 
 Other linear programing ecological inference functions: 
 \code{\link{lclphom}()},
@@ -137,6 +226,7 @@ Other linear programing ecological inference functions:
 \code{\link{nslphom_dual}()},
 \code{\link{nslphom_joint}()},
 \code{\link{nslphom}()},
+\code{\link{rslphom}()},
 \code{\link{tslphom_dual}()},
 \code{\link{tslphom_joint}()},
 \code{\link{tslphom}()}

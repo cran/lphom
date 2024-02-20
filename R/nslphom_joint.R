@@ -4,7 +4,7 @@
 #'
 #' @author Jose M. Pavia, \email{pavia@@uv.es}
 #' @author Rafael Romero \email{rromero@@eio.upv.es}
-#' @references Pavia, JM and Romero, R (2021). Symmetry estimating RxC vote transfer matrices from aggregate data, mimeo.
+#' @references Pavia, JM and Romero, R (2024). Symmetry estimating RxC vote transfer matrices from aggregate data. *Journal of the Royal Statistical Society, Series A – Statistics in Society*, forthcoming.  \doi{10.1093/jrsssa/qnae013}
 #'
 #' @param votes_election1 data.frame (or matrix) of order IxJ with the counts to be initially
 #'                        mapped to rows. When estimating vote transfer matrices, the votes gained by 
@@ -15,7 +15,7 @@
 #' @param votes_election2 data.frame (or matrix) of order IxK with the counts to be initially mapped 
 #'                        to columns. When estimating vote transfer matrices, the votes gained by
 #'                        the *K* political options competing on election 2 (or destination) in the *I* 
-#'                        territorial units considered. In general, The sum by rows of `votes_election1` and
+#'                        territorial units considered. The sum by rows of `votes_election1` and
 #'                        `votes_election2` must coincide.
 #'
 #' @param iter.max Maximum number of iterations to be performed. The process ends independently when either
@@ -23,16 +23,16 @@
 #'                 consecutive estimates of both ways probability transfer matrices are less than `tol`.
 #'                 By default, 10.
 #'
-#' @param min.first A TRUE/FALSE value. If FALSE, the matrix associated with the minimum `HETe` after
+#' @param min.first A `TRUE/FALSE` value. If `FALSE`, the matrix associated with the minimum `HETe` after
 #'                  performing `iter.max` iterations is taken as solution.
-#'                  If TRUE, the associated matrix to the instant in which the first decrease of `HETe` occurs
+#'                  If `TRUE`, the associated matrix to the instant in which the first decrease of `HETe` occurs
 #'                  is taken as solution. The process stops at that moment. In this last scenario
-#'                  (when `min.first = TRUE`), `iter.max` is is forced to be at least 100. Default, FALSE.
+#'                  (when `min.first = TRUE`), `iter.max` is is forced to be at least 100. Default, `FALSE`.
 #'
-#' @param integers A TRUE/FALSE value that indicates whether the problem is solved in integer values in
+#' @param integers A `TRUE/FALSE` value that indicates whether the problem is solved in integer values in
 #'                 each iteration: zero (lphom) and intermediate and final (including unit) solutions.
-#'                 If TRUE, the initial LP matrices are approximated in each iteration to the closest integer solution
-#'                 solving the corresponding Integer Linear Program. Default, FALSE.
+#'                 If `TRUE`, the initial LP matrices are approximated in each iteration to the closest integer solution
+#'                 solving the corresponding Integer Linear Program. Default, `FALSE`.
 #'
 #' @param solver A character string indicating the linear programming solver to be used, only
 #'               `lp_solve` and `symphony` are allowed. By default, `lp_solve`. The package `Rsymphony`
@@ -61,6 +61,7 @@
 #'    \item{iter.min}{ Number of the iteration associated to the selected `VTM.votes` solution.}
 #'    \item{EHet12}{ A matrix of order IxK measuring in each unit a distance to the homogeneity hypothesis. That is, the differences under the homogeneity hypothesis between the actual recorded results and the expected results in each territorial unit for each option of election two. The matrix Eik.}
 #'    \item{EHet21}{ A matrix of order IxJ measuring in each unit a distance to the homogeneity hypothesis. That is, the differences under the homogeneity hypothesis between the actual recorded results and the expected results in each territorial unit for each option of election one. The matrix Eij.}
+#'    \item{deterministic.bounds}{ A list of two matrices of order JxK and two arrays of order JxKxI containing for each vote transition the lower and upper allowed proportions given the observed aggregates.}
 #'    \item{inputs}{ A list containing all the objects with the values used as arguments by the function.}
 #'    \item{solution_init}{ A list with the main outputs produced by **lphom_joint()**.}
 #'
@@ -175,11 +176,14 @@ nslphom_joint <- function(votes_election1,
 #  inputs$iter.max <- iter.max
 #  inputs$min.first <- min.first
 #  inputs$tol <- tol
-
+  det.bounds <- bounds_compound(origin = votes_election1,
+                                destination = votes_election2, zeros = NULL)
+  
   output <- list("VTM.votes" = VTM.votes, "HETe" = HETe.iter, "VTM12" =VTM1, "VTM21" = VTM2,
               "HETe.sequence" = HETe.sequence, "VTM.votes.sequence" = VTM.votes.sequence,
               "VTM.votes.units" = VTM.votes_units, "iter" = iter, "iter.min" = iter.min,
-              "EHet.12" = eik, "EHet.21" = eij, "inputs" = inputs, "solution_init" = inic)
+              "EHet.12" = eik, "EHet.21" = eij, "deterministic.bounds" = det.bounds, 
+              "inputs" = inputs, "solution_init" = inic)
   class(output) <- c("nslphom_joint", "ei_joint", "lphom")
   return(output)
 }

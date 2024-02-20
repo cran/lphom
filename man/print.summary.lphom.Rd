@@ -11,7 +11,7 @@
 
 \item{...}{Other arguments passed on to methods. Not currently used.}
 
-\item{margins}{A TRUE/FALSE argument informing if the margins of the matrix should be displayed. Default TRUE.}
+\item{margins}{A \code{TRUE/FALSE} argument informing if the margins of the matrix should be displayed. Default \code{TRUE}.}
 
 \item{digits}{Integer indicating the number of decimal places to be shown. Default, 2.}
 }

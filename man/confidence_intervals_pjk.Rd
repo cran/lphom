@@ -36,9 +36,6 @@ Romero, R, Pavia, JM, Martin, J and Romero G (2020). Assessing uncertainty of vo
 
 Martin, J (2020). Analisis de la incertidumbre en la estimacion de la movilidad electoral mediante el procedimiento plhom. PhD Dissertation.
 }
-\seealso{
-\code{\link{lphom}} \code{\link{error_lphom}}
-}
 \author{
 Jose M. Pavia, \email{pavia@uv.es}
 

@@ -4,7 +4,7 @@
 #'
 #' @author Jose M. Pavia, \email{pavia@@uv.es}
 #' @author Rafael Romero \email{rromero@@eio.upv.es}
-#' @references Pavia, JM and Romero, R (2021). Symmetry estimating R×C vote transfer matrices from aggregate data, mimeo.
+#' @references Pavia, JM and Romero, R (2024). Symmetry estimating RxC vote transfer matrices from aggregate data. *Journal of the Royal Statistical Society, Series A – Statistics in Society*, forthcoming.  \doi{10.1093/jrsssa/qnae013}
 #'
 #' @param votes_election1 data.frame (or matrix) of order IxJ with the counts to be initially
 #'                        mapped to rows. When estimating vote transfer matrices, the votes gained by 
@@ -15,13 +15,13 @@
 #' @param votes_election2 data.frame (or matrix) of order IxK with the counts to be initially mapped 
 #'                        to columns. When estimating vote transfer matrices, the votes gained by
 #'                        the *K* political options competing on election 2 (or destination) in the *I* 
-#'                        territorial units considered. In general, The sum by rows of `votes_election1` and
+#'                        territorial units considered. The sum by rows of `votes_election1` and
 #'                        `votes_election2` must coincide.
 #'
-#' @param integers A TRUE/FALSE value that indicates whether the problem is solved in integer values
-#'                 in both iterations: zero (lphom) and final (including unit) solutions. If TRUE, the LP matrices
+#' @param integers A `TRUE/FALSE` value that indicates whether the problem is solved in integer values
+#'                 in both iterations: zero (lphom) and final (including unit) solutions. If `TRUE`, the LP matrices
 #'                 are approximated to the closest integer solution solving the corresponding Integer Linear Program.
-#'                 Default, FALSE.
+#'                 Default, `FALSE`.
 #'                        
 #' @param solver A character string indicating the linear programming solver to be used, only
 #'               `lp_solve` and `symphony` are allowed. By default, `lp_solve`. The package `Rsymphony`

@@ -7,12 +7,12 @@
 \method{summary}{lphom}(object, ...)
 }
 \arguments{
-\item{object}{An object output of a \strong{lphom} family algorithm.}
+\item{object}{An object output of a \code{lphom} family algorithm.}
 
 \item{...}{Other arguments passed on to methods. Not currently used.}
 }
 \value{
-An object of class \code{"summary_lphom"}.
+An object of class \code{"summary.lphom"}.
 }
 \description{
 Summary method for objects obtained with an algorithm of the lphom-family (lphom, tslphom, nslphom, tslphom_dual, nslphom_joint, ....).

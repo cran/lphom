@@ -42,8 +42,39 @@ determinar_zeros_estructurales <- function(lphom.object){
     output[[length(output) + 1L]] <- c(J.final - 1L, K.final)
     output[[length(output) + 1L]] <- c(J.final, K.final)
   }
+  if ((escenario == "ordinary") & (K.inic == K.final) & (J.inic < J.final)){
+    output[[length(output) + 1L]] <- c(J.final, K.final)
+  }
+  if ((escenario == "ordinary") & (K.inic < K.final) & (J.inic < J.final)){
+    output[[length(output) + 1L]] <- c(J.final, K.final - 1L)
+    output[[length(output) + 1L]] <- c(J.final, K.final)
+  }
+  if ((escenario == "enriched") & (K.inic == K.final) & (J.inic == J.final)){
+    output[[length(output) + 1L]] <- c(J.final, K.final)
+  }
+  if ((escenario == "enriched") & (K.inic == K.final) & (J.inic < J.final)){
+    output[[length(output) + 1L]] <- c(J.final - 1L, K.final)
+    output[[length(output) + 1L]] <- c(J.final, K.final)
+  }
+  if ((escenario == "enriched") & (K.inic < K.final) & (J.inic == J.final)){
+    output[[length(output) + 1L]] <- c(J.final, K.final - 1L)
+    output[[length(output) + 1L]] <- c(J.final, K.final)
+  }
+  if ((escenario == "enriched") & (K.inic < K.final) & (J.inic < J.final)){
+    output[[length(output) + 1L]] <- c(J.final - 1L, K.final - 1L)
+    output[[length(output) + 1L]] <- c(J.final - 1L, K.final)
+    output[[length(output) + 1L]] <- c(J.final, K.final - 1L)
+    output[[length(output) + 1L]] <- c(J.final, K.final)
+  }
+  if (escenario == "semifull"){
+    output[[length(output) + 1L]] <- c(J.inic, K.inic)
+  }
   if (escenario == "full"){
     output[[length(output) + 1L]] <- c(J.inic - 1L, K.inic)
+    output[[length(output) + 1L]] <- c(J.inic, K.inic)
+  }
+  if (escenario == "fullreverse"){
+    output[[length(output) + 1L]] <- c(J.inic, K.inic - 1L)
     output[[length(output) + 1L]] <- c(J.inic, K.inic)
   }
   if (escenario == "gold"){
@@ -72,6 +103,7 @@ simular_arrays_transferencia <- function(lphom.object, d){
     for (ii in 1L:nrow(lphom.object$origin)){
       output[, , ii] <- output[, , ii]/rowSums(output[, , ii])
     }
+    output[is.nan(output)] <- 0
   }
   return(output)
 }
@@ -118,6 +150,17 @@ HET_MT.votos_MT.prop_Y <- function(array.votos){
   return(output)
 }
 
+# La funcion errors_hom() calcula, dada una matriz de transferencia VTM, para cada unidad la distancia que 
+# existe entre lo que se observa en esa unidad y lo que se esperaría observar si se aplicase esa matriz 
+# de transferencia. Es decir, la distancia a la uniformidad.
+errors_hom <- function(VTM, origen, destino){
+  output <- NULL
+  for (i in 1:nrow(origen)){
+    output <- c(output, sum(abs(destino[i, ] - origen[i, ] %*% VTM)))
+  }
+  return(output)
+}
+
 # La función **EI_index()** calcula el índice de discrepancia o de error, siguiendo la
 # definición de la ecuación (12) de Romero et al. (2020), entre la matriz origen-destino
 # de votos real (que es conocida en cada escenario simulado), y una matriz origen-destino
@@ -137,20 +180,40 @@ simular_y_resumir <- function(lphom.object, d){
   array.votos <- simular_arrays_votos(lphom.object, d)
   resumenes <- HET_MT.votos_MT.prop_Y(array.votos)
   # Ajuste de decimales
+  resumenes$Y <- round(resumenes$Y)
   resumenes$Y[, 1L] <- resumenes$Y[, 1L] + (rowSums(lphom.object$origin) - rowSums(resumenes$Y))
   negativos <- resumenes$Y[, 1L] < 0
   origen <- lphom.object$origin
   origen[negativos, 1L] <- origen[negativos, 1L] - resumenes$Y[negativos, 1L]
   resumenes$Y[negativos, 1L] <- 0
-  resumenes$Y <- round(resumenes$Y)
+  rownames(resumenes$Y) <- rownames(origen)
+  if(lphom.object$inputs$integers) resumenes$Y <- round(resumenes$Y)
+  J.inic <- ncol(lphom.object$inputs$votes_election1)
+  J.fin <- ncol(origen)
+  K.inic <- ncol(lphom.object$inputs$votes_election2)
+  K.fin <- ncol(resumenes$Y)
+  escenario <- lphom.object$inputs$new_and_exit_voters
+#  if(escenario == "raw" & (K.fin > K.inic) & (J.fin > J.inic)) escenario <- "enriched"
+#  if(escenario == "raw" & (K.fin > K.inic)) escenario <- "ordinary"
+#  if(escenario == "regular" & (K.fin > K.inic) & (J.fin > J.inic)) escenario <- "full"
+#  if(escenario == "regular" & (K.fin > K.inic)) escenario <- "semifull"
+#  if(escenario == "ordinary" & (K.fin > K.inic) & (J.fin > J.inic)) escenario <- "fullreverse"
+#  if(escenario == "ordinary" & (J.fin > J.inic)) escenario <- "semifull"
+#  if(escenario == "enriched" & (K.fin > K.inic) & (J.fin > J.inic)) escenario <- "gold"
+#  if(escenario == "enriched" & (K.fin > K.inic)) escenario <- "fullreverse"
+#  if(escenario == "enriched" & (J.fin > J.inic)) escenario <- "full"
   # Estimacion
   estimacion <- suppressMessages(lphom(votes_election1 = origen,
                                        votes_election2 = resumenes$Y,
-                                       new_and_exit_voters = lphom.object$inputs$new_and_exit_voters,
+                                       new_and_exit_voters = escenario,
+                                       apriori = lphom.object$inputs$apriori,
+                                       lambda = lphom.object$inputs$lambda,
+                                       uniform = lphom.object$inputs$uniform,
                                        structural_zeros = ceros,
                                        integers = lphom.object$inputs$integers,
                                        verbose = FALSE,
-                                       lphom.object$inputs$solver))
+                                       solver = lphom.object$inputs$solver,
+                                       integers.solver = lphom.object$inputs$integers.solver))
   estimacion$VTM.complete <- estimacion$VTM.complete[1L:nrow(resumenes$MT.prop),
                                                      1L:ncol(resumenes$MT.prop)]
   estimacion$VTM.complete <- estimacion$VTM.complete/rowSums(estimacion$VTM.complete)
@@ -530,10 +593,14 @@ lphom_local <- function(lphom.object, iii, solver){
   escenario <- lphom.object$inputs$new_and_exit_voters[1L]
   J.inic <- ncol(lphom.object$inputs$votes_election1)
   K.inic <- ncol(lphom.object$inputs$votes_election2)
+  
   # Raw scenario. Constraints pjk(j,K) constant,
-  if ((escenario == "raw") & (J.inic < nj) & (K.inic < nk)){
-    pb <- yt[nk]/sum(xt[1L:(nj - 1L)])
-    ab <- matrix(0L, nj,3L*njk)
+  if (((escenario == "raw") & (J.inic < nj) & (K.inic < nk)) |
+      ((escenario == "ordinary") & (J.inic < nj) & (K.inic == nk)) |
+      ((escenario == "enriched") & (J.inic == nj) & (K.inic == nk)) |
+      (escenario == "semifull")){
+    pb <- yt[nk]/sum(xt[1L:(nj-1L)])
+    ab <- matrix(0L, nj, 3L*njk)
     bb <- rep(0L, nj)
     for (j in 1L:nj){
       ab[j,j*nk] <- 1L
@@ -542,11 +609,12 @@ lphom_local <- function(lphom.object, iii, solver){
     a = rbind(a,ab)
     b = c(b,bb)
   }
-  if ((escenario == "raw") & (J.inic == nj) & (K.inic < nk)){
+  if (((escenario == "raw") & (J.inic == nj) & (K.inic < nk)) |
+      ((escenario == "ordinary") & (J.inic == nj) & (K.inic == nk))){
     pb <- yt[nk]/sum(xt[1L:nj])
-    ab <- matrix(0L, nj,3L*njk)
+    ab <- matrix(0L, nj, 3L*njk)
     bb <- rep(0L, nj)
-    for (j in 1L:nj){
+    for (j in 1L:(nj)){
       ab[j,j*nk] <- 1L
       bb[j] <- pb
     }
@@ -555,12 +623,13 @@ lphom_local <- function(lphom.object, iii, solver){
   }
   
   # Regular scenario. Constraints pjk(j,K) constant.
-  if ((escenario == "regular") & (K.inic < nk) & (J.inic < nj)){
+  if (((escenario == "regular") & (K.inic < nk) & (J.inic < nj)) |
+      ((escenario == "enriched") & (K.inic == nk) & (J.inic < nj))){
     pb <- yt[nk]/sum(xt[1L:(nj-2L)])
     ab <- matrix(0L, nj, 3L*njk)
     bb <- rep(0L, nj)
     for (j in 1L:nj){
-      ab[j,j*nk] <- 1
+      ab[j,j*nk] <- 1L
       bb[j] <- pb*(j < (nj-1L))
     }
     a = rbind(a,ab)
@@ -568,7 +637,7 @@ lphom_local <- function(lphom.object, iii, solver){
   }
   if ((escenario == "regular") & (J.inic == nj) & (K.inic < nk)){
     pb <- yt[nk]/sum(xt[1L:(nj-1L)])
-    ab <- matrix(0L, nj,3L*njk)
+    ab <- matrix(0L, nj, 3L*njk)
     bb <- rep(0L, nj)
     for (j in 1L:nj){
       ab[j,j*nk] = 1L
@@ -578,10 +647,60 @@ lphom_local <- function(lphom.object, iii, solver){
     b = c(b,bb)
   }
   
+  # Ordinary. Constraints pjk(j,K), pjk(j,K-1) constant.
+  if (((escenario == "ordinary") & (J.inic == nj) & (K.inic < nk))){
+    # Column K-1
+    pb <- yt[nk-1L]/sum(xt[1L:nj])
+    ab <- matrix(0L, nj, 3L*njk)
+    bb <- rep(0L, nj)
+    for (j in 1L:nj){
+      ab[j,(nk-1L) + (j-1L)*nk] <- 1L
+      bb[j] <- pb
+    }
+    a = rbind(a,ab)
+    b = c(b,bb)
+    # Column K
+    pb <- yt[nk]/sum(xt[1L:nj])
+    ab <- matrix(0L, nj, 3L*njk)
+    bb <- rep(0L, nj)
+    for (j in 1L:nj){
+      ab[j,j*nk] <- 1L
+      bb[j] <- pb
+    }
+    a = rbind(a,ab)
+    b = c(b,bb)
+  }
+  
+  if (((escenario == "ordinary") & (J.inic < nj) & (K.inic < nk)) |
+      ((escenario == "enriched") & (J.inic == nj) & (K.inic < nk)) |
+      (escenario == "fullreverse")){
+    # Column K-1
+    pb <- yt[nk-1L]/sum(xt[1L:(nj-1L)])
+    ab <- matrix(0L, nj, 3L*njk)
+    bb <- rep(0L, nj)
+    for (j in 1L:nj){
+      ab[j,(nk-1L) + (j-1L)*nk] <- 1L
+      bb[j] <- pb*(j < nj)
+    }
+    a = rbind(a,ab)
+    b = c(b,bb)
+    # Column K
+    pb <- yt[nk]/sum(xt[1L:(nj-1L)])
+    ab <- matrix(0L, nj, 3L*njk)
+    bb <- rep(0L, nj)
+    for (j in 1L:nj){
+      ab[j,j*nk] <- 1L
+      bb[j] <- pb*(j < nj)
+    }
+    a = rbind(a,ab)
+    b = c(b,bb)
+    
+  }
+  
   # Full scenario. Constraints pjk(j,K) constant.
   if (escenario == "full"){
-    pb <- yt[nk]/sum(xt[1L:(nj - 2L)])
-    ab <- matrix(0L, nj, 3L*njk)
+    pb <- yt[nk]/sum(xt[1L:(nj-2L)])
+    ab <- matrix(0, nj, 3L*njk)
     bb <- rep(0L, nj)
     for (j in 1L:nj){
       ab[j,j*nk] <- 1L
@@ -592,7 +711,8 @@ lphom_local <- function(lphom.object, iii, solver){
   }
   
   # Gold scenario. Constraints pjk(j,K) constant.
-  if (escenario == "gold"){
+  if ((escenario == "gold") |
+      ((escenario == "enriched") & (J.inic < nj) & (K.inic < nk))){
     # Column K-1
     pb <- yt[nk-1L]/sum(xt[1L:(nj-2L)])
     ab <- matrix(0L, nj, 3L*njk)
@@ -691,8 +811,12 @@ lphom_local_abs <- function(lphom.object, iii, solver){
   escenario <- lphom.object$inputs$new_and_exit_voters[1L]
   J.inic <- ncol(lphom.object$inputs$votes_election1)
   K.inic <- ncol(lphom.object$inputs$votes_election2)
+  
   # Raw scenario. Constraints pjk(j,K) constant,
-  if ((escenario == "raw") & (J.inic < nj) & (K.inic < nk)){
+  if (((escenario == "raw") & (J.inic < nj) & (K.inic < nk)) |
+      ((escenario == "ordinary") & (J.inic < nj) & (K.inic == nk)) |
+      ((escenario == "enriched") & (J.inic == nj) & (K.inic == nk)) |
+      (escenario == "semifull")){
     pb <- yt[nk]/sum(xt[1L:(nj-1L)])
     ab <- matrix(0L, nj, 3L*njk)
     bb <- rep(0L, nj)
@@ -703,7 +827,8 @@ lphom_local_abs <- function(lphom.object, iii, solver){
     a = rbind(a,ab)
     b = c(b,bb)
   }
-  if ((escenario == "raw") & (J.inic == nj) & (K.inic < nk)){
+  if (((escenario == "raw") & (J.inic == nj) & (K.inic < nk)) |
+      ((escenario == "ordinary") & (J.inic == nj) & (K.inic == nk))){
     pb <- yt[nk]/sum(xt[1L:nj])
     ab <- matrix(0L, nj, 3L*njk)
     bb <- rep(0L, nj)
@@ -716,7 +841,8 @@ lphom_local_abs <- function(lphom.object, iii, solver){
   }
   
   # Regular scenario. Constraints pjk(j,K) constant.
-  if ((escenario == "regular") & (K.inic < nk) & (J.inic < nj)){
+  if (((escenario == "regular") & (K.inic < nk) & (J.inic < nj)) |
+      ((escenario == "enriched") & (K.inic == nk) & (J.inic < nj))){
     pb <- yt[nk]/sum(xt[1L:(nj-2L)])
     ab <- matrix(0L, nj, 3L*njk)
     bb <- rep(0L, nj)
@@ -739,6 +865,56 @@ lphom_local_abs <- function(lphom.object, iii, solver){
     b = c(b,bb)
   }
   
+  # Ordinary. Constraints pjk(j,K), pjk(j,K-1) constant.
+  if (((escenario == "ordinary") & (J.inic == nj) & (K.inic < nk))){
+    # Column K-1
+    pb <- yt[nk-1L]/sum(xt[1L:nj])
+    ab <- matrix(0L, nj, 3L*njk)
+    bb <- rep(0L, nj)
+    for (j in 1L:nj){
+      ab[j,(nk-1L) + (j-1L)*nk] <- 1L
+      bb[j] <- pb
+    }
+    a = rbind(a,ab)
+    b = c(b,bb)
+    # Column K
+    pb <- yt[nk]/sum(xt[1L:nj])
+    ab <- matrix(0L, nj, 3L*njk)
+    bb <- rep(0L, nj)
+    for (j in 1L:nj){
+      ab[j,j*nk] <- 1L
+      bb[j] <- pb
+    }
+    a = rbind(a,ab)
+    b = c(b,bb)
+  }
+  
+  if (((escenario == "ordinary") & (J.inic < nj) & (K.inic < nk)) |
+      ((escenario == "enriched") & (J.inic == nj) & (K.inic < nk)) |
+      (escenario == "fullreverse")){
+    # Column K-1
+    pb <- yt[nk-1L]/sum(xt[1L:(nj-1L)])
+    ab <- matrix(0L, nj, 3L*njk)
+    bb <- rep(0L, nj)
+    for (j in 1L:nj){
+      ab[j,(nk-1L) + (j-1L)*nk] <- 1L
+      bb[j] <- pb*(j < nj)
+    }
+    a = rbind(a,ab)
+    b = c(b,bb)
+    # Column K
+    pb <- yt[nk]/sum(xt[1L:(nj-1L)])
+    ab <- matrix(0L, nj, 3L*njk)
+    bb <- rep(0L, nj)
+    for (j in 1L:nj){
+      ab[j,j*nk] <- 1L
+      bb[j] <- pb*(j < nj)
+    }
+    a = rbind(a,ab)
+    b = c(b,bb)
+    
+  }
+  
   # Full scenario. Constraints pjk(j,K) constant.
   if (escenario == "full"){
     pb <- yt[nk]/sum(xt[1L:(nj-2L)])
@@ -753,7 +929,8 @@ lphom_local_abs <- function(lphom.object, iii, solver){
   }
   
   # Gold scenario. Constraints pjk(j,K) constant.
-  if (escenario == "gold"){
+  if ((escenario == "gold") |
+      ((escenario == "enriched") & (J.inic < nj) & (K.inic < nk))){
     # Column K-1
     pb <- yt[nk-1L]/sum(xt[1L:(nj-2L)])
     ab <- matrix(0L, nj, 3L*njk)
@@ -875,8 +1052,13 @@ lphom_local_max <- function(lphom.object, iii, solver){
   escenario <- lphom.object$inputs$new_and_exit_voters[1]
   J.inic <- ncol(lphom.object$inputs$votes_election1)
   K.inic <- ncol(lphom.object$inputs$votes_election2)
+  
+  
   # Raw scenario. Constraints pjk(j,K) constant,
-  if ((escenario == "raw") & (J.inic < nj) & (K.inic < nk)){
+  if (((escenario == "raw") & (J.inic < nj) & (K.inic < nk)) |
+      ((escenario == "ordinary") & (J.inic < nj) & (K.inic == nk)) |
+      ((escenario == "enriched") & (J.inic == nj) & (K.inic == nk)) |
+      (escenario == "semifull")){
     pb <- yt[nk]/sum(xt[1L:(nj-1L)])
     ab <- matrix(0L, nj, 3L*njk)
     bb <- rep(0L, nj)
@@ -887,7 +1069,8 @@ lphom_local_max <- function(lphom.object, iii, solver){
     a = rbind(a,ab)
     b = c(b,bb)
   }
-  if ((escenario == "raw") & (J.inic == nj) & (K.inic < nk)){
+  if (((escenario == "raw") & (J.inic == nj) & (K.inic < nk)) |
+      ((escenario == "ordinary") & (J.inic == nj) & (K.inic == nk))){
     pb <- yt[nk]/sum(xt[1L:nj])
     ab <- matrix(0L, nj, 3L*njk)
     bb <- rep(0L, nj)
@@ -900,7 +1083,8 @@ lphom_local_max <- function(lphom.object, iii, solver){
   }
   
   # Regular scenario. Constraints pjk(j,K) constant.
-  if ((escenario == "regular") & (K.inic < nk) & (J.inic < nj)){
+  if (((escenario == "regular") & (K.inic < nk) & (J.inic < nj)) |
+      ((escenario == "enriched") & (K.inic == nk) & (J.inic < nj))){
     pb <- yt[nk]/sum(xt[1L:(nj-2L)])
     ab <- matrix(0L, nj, 3L*njk)
     bb <- rep(0L, nj)
@@ -923,21 +1107,72 @@ lphom_local_max <- function(lphom.object, iii, solver){
     b = c(b,bb)
   }
   
-  # Full scenario. Constraints pjk(j,K) constant.
-  if (escenario == "full"){
-    pb <- yt[nk]/sum(xt[1L:(nj-2L)])
+  # Ordinary. Constraints pjk(j,K), pjk(j,K-1) constant.
+  if (((escenario == "ordinary") & (J.inic == nj) & (K.inic < nk))){
+    # Column K-1
+    pb <- yt[nk-1L]/sum(xt[1L:nj])
+    ab <- matrix(0L, nj, 3L*njk)
+    bb <- rep(0L, nj)
+    for (j in 1L:nj){
+      ab[j,(nk-1L) + (j-1L)*nk] <- 1L
+      bb[j] <- pb
+    }
+    a = rbind(a,ab)
+    b = c(b,bb)
+    # Column K
+    pb <- yt[nk]/sum(xt[1L:nj])
     ab <- matrix(0L, nj, 3L*njk)
     bb <- rep(0L, nj)
     for (j in 1L:nj){
       ab[j,j*nk] <- 1L
-      bb[j] <- pb*(j < (nj - 1L))
+      bb[j] <- pb
+    }
+    a = rbind(a,ab)
+    b = c(b,bb)
+  }
+  
+  if (((escenario == "ordinary") & (J.inic < nj) & (K.inic < nk)) |
+      ((escenario == "enriched") & (J.inic == nj) & (K.inic < nk)) |
+      (escenario == "fullreverse")){
+    # Column K-1
+    pb <- yt[nk-1L]/sum(xt[1L:(nj-1L)])
+    ab <- matrix(0L, nj, 3L*njk)
+    bb <- rep(0L, nj)
+    for (j in 1L:nj){
+      ab[j,(nk-1L) + (j-1L)*nk] <- 1L
+      bb[j] <- pb*(j < nj)
+    }
+    a = rbind(a,ab)
+    b = c(b,bb)
+    # Column K
+    pb <- yt[nk]/sum(xt[1L:(nj-1L)])
+    ab <- matrix(0L, nj, 3L*njk)
+    bb <- rep(0L, nj)
+    for (j in 1L:nj){
+      ab[j,j*nk] <- 1L
+      bb[j] <- pb*(j < nj)
+    }
+    a = rbind(a,ab)
+    b = c(b,bb)
+    
+  }
+  
+  # Full scenario. Constraints pjk(j,K) constant.
+  if (escenario == "full"){
+    pb <- yt[nk]/sum(xt[1L:(nj-2L)])
+    ab <- matrix(0, nj, 3L*njk)
+    bb <- rep(0L, nj)
+    for (j in 1L:nj){
+      ab[j,j*nk] <- 1L
+      bb[j] <- pb*(j < (nj-1L))
     }
     a = rbind(a,ab)
     b = c(b,bb)
   }
   
   # Gold scenario. Constraints pjk(j,K) constant.
-  if (escenario == "gold"){
+  if ((escenario == "gold") |
+      ((escenario == "enriched") & (J.inic < nj) & (K.inic < nk))){
     # Column K-1
     pb <- yt[nk-1L]/sum(xt[1L:(nj-2L)])
     ab <- matrix(0L, nj, 3L*njk)
@@ -1408,3 +1643,234 @@ test_integers <- function(argg){
   }
   return(integers)
 }
+
+# Calcula los bounds correspondientes a la coordenada (1,1) de una tabla 2x2
+# filas: vector de orden dos con los marginales por fila
+# columnas: vector de orden dos con los marginales por fila
+bounds_uni <- function(filas, columnas){
+  Xi <- filas[1L]/sum(filas)
+  Ti <- columnas[1L]/sum(columnas)
+  Li <- max(0L, (Ti - (1L- Xi))/Xi)
+  Ui <- min(1L, Ti/Xi)
+  if (Xi == 0) Li <- Ui <- 0
+  return(list("lower" = Li, "upper" = Ui))
+}
+
+# Calcula los bounds correspondientes a todas las coordenadas de la matriz
+bounds <- function(marg.row, marg.col){
+  J <- length(marg.row)
+  K <- length(marg.col)
+  lower <- upper <- matrix(NA, J, K)
+  for (j in 1L:J){
+    for (k in 1L:K){
+      filas <- c(marg.row[j], sum(marg.row) - marg.row[j])
+      columnas <- c(marg.col[k], sum(marg.col) - marg.col[k])
+      limits <- bounds_uni(filas = filas, columnas = columnas)
+      lower[j, k] <- limits$lower
+      upper[j, k] <- limits$upper
+    }
+  }
+  rownames(lower) <- rownames(upper) <- names(marg.row)
+  colnames(lower) <- colnames(upper) <- names(marg.col)
+  return(list("lower" = lower, "upper" = upper))
+}
+
+# Calcula los bounds correspondientes a todas las coordenadas de la matriz global
+# y de las matrices locales
+bounds_compound <- function(origin, destination, zeros){
+  origin <- as.matrix(origin)
+  destination <- as.matrix(destination)
+  I <- nrow(origin)
+  J <- ncol(origin)
+  K <- ncol(destination)
+  lower <- upper <- matrix(0, J, K)
+  lower.u <- upper.u <- array(NA, dim = c(J, K, I))
+  for (i in 1L:I){
+    limits <- bounds(marg.row = origin[i, ], marg.col = destination[i, ])
+    lower <- lower + limits$lower*origin[i, ]
+    upper <- upper + limits$upper*origin[i, ]
+    lower.u[, , i] <- limits$lower
+    upper.u[, , i] <- limits$upper
+  }
+  lower <- lower*(colSums(origin)^-1L)
+  upper <- upper*(colSums(origin)^-1L)
+  
+  if (!is.null(zeros)){
+    for (z in 1L:length(zeros)){
+      lower[zeros[[z]][1L], zeros[[z]][2L]] <- upper[zeros[[z]][1], zeros[[z]][2]] <- 0L
+      lower.u[zeros[[z]][1L], zeros[[z]][2L], ] <- upper.u[zeros[[z]][1], zeros[[z]][2], ] <- 0L
+    }
+  }
+  
+  rownames(lower) <- rownames(upper) <- colnames(origin)
+  colnames(lower) <- colnames(upper) <- colnames(destination)
+  dimnames(lower.u) <- dimnames(upper.u) <- c(dimnames(lower),
+                                              list(rownames(origin)))
+  
+  return(list("lower" = lower, "upper" = upper, 
+              "lower.units" = lower.u, "upper.units" = upper.u))
+}
+
+# derivative of digamma function
+digamma1 <- function(x, h = 1e-3)
+{
+  ( digamma(x + h) - digamma(x - h) ) / (2*h)
+}
+
+# Maximum likelihood estimation of distribution parameters
+dirichlet.mle <- function(x, weights = NULL, eps = 10^(-5), convcrit = .00001,
+                           maxit = 1000, oldfac = .1)
+{
+  N <- nrow(x)
+  K <- ncol(x)
+  # compute log pbar
+  x <- ( x + eps ) / ( 1L + 2L*eps )
+  x <- x / rowSums(x)
+  N <- nrow(x)
+  if ( is.null(weights) ){
+    # weights <- rep(1L, N)
+    weights <- rowSums(x)
+  }
+  weights <- N * weights / sum( weights )
+  log.pbar <- colMeans( weights * log( x ) )
+  # compute inits
+  alphaprob <- colMeans( x * weights )
+  p2 <- mean( x[ ,1L]^2L * weights )
+  xsi <- ( alphaprob[1L] - p2 ) / ( p2 - ( alphaprob[1L] )^2L )
+  alpha <- xsi * alphaprob
+  K1 <- matrix(1L, K, K)
+  conv <- 1L
+  iter <- 1L
+  
+  #--- BEGIN iterations
+  while( ( conv > convcrit ) & (iter < maxit) ){
+    alpha0 <- alpha
+    g <- N * digamma( sum(alpha ) ) - N * digamma(alpha) + N * log.pbar
+    z <- N * digamma1( sum(alpha ))
+    H <- diag( -N * digamma1( alpha ) ) + z
+    alpha <- alpha0 - solve(H, g )
+    alpha[ alpha < 0L ] <- 1e-10
+    alpha <- alpha0 + oldfac*( alpha - alpha0 )
+    conv <- max( abs( alpha0 - alpha ) )
+    iter <- iter + 1L
+  }
+  alpha0 <- sum(alpha)
+  xsi <- alpha / alpha0
+  res <- list( alpha=alpha, alpha0=alpha0, xsi=xsi )
+  return(res)
+}
+
+# Estima los parametros shape de una beta dada su media y su varianza.
+estBetaParams <- function(mu, var) {
+  alpha <- ((1L - mu) / var - 1L / mu) * mu ^ 2L
+  beta <- alpha * (1L / mu - 1L)
+  return(c(alpha, beta))
+}
+
+# Calcula la solucion lphom despyes de reescalar la unidad ii de acuerdo con w, auxiliar de rslphom
+rescaled <- function(lphom.object, w, ii, ceros){
+  v1.w <- lphom.object$origin
+  v2.w <- lphom.object$destination
+  Vi <- sum(v1.w[ii, ])
+  Ti <- sum(v1.w) - Vi
+  v1.w[ii, ] <- v1.w[ii, ] * w * Ti /(Vi * (1L - w))
+  v2.w[ii, ] <- v2.w[ii, ] * w * Ti /(Vi * (1L - w))
+  
+  # Ajuste entero
+  if (w == 0L){
+    v1.w <- v1.w[-ii, ]
+    v2.w <- v2.w[-ii, ]
+  } else {
+    entera <- ajuste_entero(v1i = v1.w[ii, ], v2i = v2.w[ii, ])
+    v1.w[ii, ] <- entera$v1
+    v2.w[ii, ] <- entera$v2
+  }
+  
+  lphom.temp <- lphom(votes_election1 = v1.w, votes_election2 = v2.w,
+                      new_and_exit_voters = "simultaneous",
+                      apriori = lphom.object$inputs$apriori, lambda = lphom.object$inputs$lambda,
+                      uniform = lphom.object$inputs$uniform,
+                      structural_zeros = ceros, integers = lphom.object$inputs$integers,
+                      verbose = FALSE, solver = lphom.object$inputs$solver,
+                      integers.solver = lphom.object$inputs$integers.solver)
+  
+  lphom.temp$origin <- lphom.object$origin
+  lphom.temp$destination <- lphom.object$destination
+  
+  return(lphom.temp)
+}
+
+# Funcion para asegura que despues de rescalar una unidad, dentro de rslphom, los valores 
+# que corresponden a la unidad son enteros
+ajuste_entero <- function(v1i, v2i){
+  v1 <- round(v1i)
+  v2 <- round(v2i)
+  
+  if (sum(v1) > sum(v2)){
+    dist <- sum(v1) - sum(v2)
+    v2[order(v2i - v2, decreasing = T)[1L:dist]] <- v2[order(v2i - v2, decreasing = T)[1L:dist]] + 1L
+  }
+  
+  if (sum(v2) > sum(v1)){
+    dist <- sum(v2) - sum(v1)
+    v1[order(v1i - v1, decreasing = T)[1L:dist]] <- v1[order(v1i - v1, decreasing = T)[1L:dist]] + 1L
+  }
+  
+  output <- list("v1" = v1, "v2" = v2)
+  return(output)
+}
+
+# La funcion adjust2counts dado un vector decimal encuentra el vector entero
+# con entradas enteras más próxima de suma dada, utilizando lpSolve.
+adjust2counts <- function(vector, suma){
+  #
+  # INPUT:
+  #       vector: vector decimal de m componentes 
+  #       suma: suma objetivo del vector
+  # OUTPUT:
+  #       un vector de la misma longitud que vector de numeros enteros de
+  #       suma igual a suma
+  #
+  
+  # funcion objetivo
+  objetivo<-rep(c(1L, 1L, 0L),length(vector))
+  
+  # Restricciones de que los coeficientes del vector mas el valor positivo
+  # menos el valor negativo debe ser igual al entero mas proximo
+  R1 <- t(kronecker(diag(length(vector)), c(1L, -1L, 1L)))
+  c1 <- vector
+  # Restricciones de suma de filas
+  R2 <- rep(c(0L, 0L, 1L),length(vector))
+  c2 <- suma
+  # Conjunto de todas las restricciones
+  R <- rbind(R1, R2)
+  c0 <- c(c1, c2)
+  # Tipo de restricciones
+  direc <- rep("==",length(c0))
+  # Indices de las variables que han de ser enteras
+  tipos <- rep(c("C","C","I"),length(vector))
+  indices <- which(tipos == "I")
+  # Matriz de transferencia con valores enteros
+  
+  
+  nsol <- suppressWarnings(lpSolve::lp('min', 
+                                       objetivo, 
+                                       R, 
+                                       direc, 
+                                       c0,
+                                       int.vec = indices))
+  return(nsol$solution[indices])
+}
+
+# Ajusta los valores de las filas x para que cuadren con las sumas de y
+adjust_xy <- function(x, y, integers){
+  for(ii in 1L:nrow(x)){
+    x[ii, ] <- (as.numeric(x[ii, ]) * sum(y[ii, ])/sum(x[ii, ]))
+    if (integers) x[ii, ] <- as.integer(adjust2counts(vector = x[ii, ], suma = sum(y[ii, ]) ))
+  }
+  return(x)
+}
+
+
+
+

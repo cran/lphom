@@ -42,7 +42,8 @@ ggplot2 is needed to be installed for this function to work.
 See equation (12) in Romero et al. (2020) for a definition of the EI index.
 }
 \examples{
-mt.lphom <- lphom(France2017P[, 1:8], France2017P[, 9:12], "raw", NULL, FALSE)
+mt.lphom <- lphom(France2017P[, 1:8], France2017P[, 9:12], 
+                  new_and_exit_voters = "raw", verbose = FALSE)
 set.seed(253443)
 example <- error_lphom(mt.lphom, upper.alfa = 0.10, show.plot = FALSE, num.d = 5, B = 8)
 example$EI.estimate

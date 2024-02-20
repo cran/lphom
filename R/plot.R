@@ -4,9 +4,9 @@
 #'
 #' @author Jose M. Pavia, \email{pavia@@uv.es}
 #'
-#' @param x An object output of a **lphom** family algorithm.
-#' @param complete A TRUE/FALSE argument informing if the complete matrix should be displayed. In `regular` and `raw` scenarios this matrix includes the row and the column corresponding to net_entries and net_exits even when they are really small, less than 1% in all units. Default, FALSE 
-#' @param margins A TRUE/FALSE argument informing if the margins of the matrix should be displayed. Default TRUE.
+#' @param x An object output of a `lphom`  family algorithm.
+#' @param complete A `TRUE/FALSE` argument informing if the complete matrix should be displayed. In `raw`, `regular`, `ordinary` and `enriched` scenarios the plot includes the row and the column corresponding to net_entries and net_exits even when they are really small, less than 1% in all units. Default, `FALSE`.
+#' @param margins A `TRUE/FALSE`` argument informing if the margins of the matrix should be displayed. Default `TRUE`.
 #' @param digits Integer indicating the number of decimal places to be shown. Default, 2.
 #' @param row.names Names to be used for the rows of the matrix.
 #' @param col.names Names to be used for the columns of the matrix.
@@ -16,10 +16,10 @@
 #' @param colour.cells Background base colour for cells.
 #' @param colour.grid Colour to be used for grid lines. 
 #' @param alpha A \[0,1\] number of colour transparency.
-#' @param which A vector of integers informing the units for which the aggregate transfer matrix should be plotted. Default, NULL, the global matrix is shown.    
+#' @param which A vector of integers informing the units for which the aggregate transfer matrix should be plotted. Default, `NULL`, the global matrix is shown.    
 #' @param ... Other arguments passed on to methods. Not currently used.
 #' @param type A character string indicating the solution (transfer matrix) to be plotted. Only valid for **_dual** algorithms. `type = "w"` stands for the weighted solution and `type = "a"` for the simple average solution. Default `w`.  
-#' @param show.plot A TRUE/FALSE indicating if the plot should be displayed as a side-effect. By default, TRUE.
+#' @param show.plot A `TRUE/FALSE` argument indicating if the plot should be displayed as a side-effect. By default, `TRUE`.
 #' 
 #' @return
 #' Invisibly returns the (ggplot) description of the plot, which is a list with components that contain the plot itself, the data, information about the scales, panels etc.

@@ -18,8 +18,8 @@ test_inputs_lp_apriori <- function(argg){
   
   # Test names 2
   if (!(argg$new_and_exit_voters[1L] %in% c("raw", "regular", "ordinary", "semifull", "enriched",
-                                           "simultaneous", "full", "gold")))
-    stop('Not allowed string for argument "new_and_exit_voters". The only allowed strings for "new_and_exit_voters" are "raw", "simultaneous", "regular", "ordinary", "enriched", "semifull", "full" and "gold".')
+                                           "simultaneous", "full", "fullreverse", "gold", "adjust1", "adjust2")))
+    stop('Not allowed string for argument "new_and_exit_voters". The only allowed strings for "new_and_exit_voters" are "raw", "simultaneous", "regular", "ordinary", "enriched", , "adjust1", "adjust2", "semifull", "full", "fullreverse" and "gold".')
   
   # Test names 3
   if (!(argg$solver[1L] %in% c("lp_solve", "symphony")))
@@ -36,7 +36,7 @@ test_inputs_lp_apriori <- function(argg){
   if (ncol(y) == 1L) y <- t(y)
   if (nrow(x) != nrow(y))
     stop('The number of spatial units is different in origin and destination.')
-  if (argg$new_and_exit_voters[1L] %in% c("semifull", "simultaneous", "full", "gold")){
+  if (argg$new_and_exit_voters[1L] %in% c("semifull", "simultaneous", "full", "fullreverse", "gold")){
     if (!identical(round(rowSums(x)), round(rowSums(y)))){
       texto <- paste0('The number of voters (electors) in Election 1 and ',
                       'Election 2 differ (in at least a territorial unit). This is not ',
@@ -113,7 +113,7 @@ test_apriori_weights <- function(x0, y0, P0, pesos0, scenario){
   }
   
   # Test cuando cuadran
-  if(scenario %in% c("simultaneous", "semifull", "full", "gold")){
+  if(scenario %in% c("simultaneous", "semifull", "full", "fullreverse", "gold")){
     if (K2 < ncol(P0)){
       warning("A priori probabilities have been provided for more destination options than available 
               in 'votes_election2'. The excess of columns in 'apriori' has been omitted.")
@@ -184,12 +184,14 @@ calcular_weights <- function(x, y, P0, weights){
 calcular_weights_string <- function(x, y, P0, weights){
   if(weights == "x"){
     output <- matrix(rep(x, length(y)), length(x), length(y))
-    if(min(output, na.rm = TRUE) > 1L) output <- output/min(output, na.rm = TRUE)
+    if(min(output[output != 0], na.rm = TRUE) > 1L) 
+      output[output != 0] <- output[output != 0]/min(output[output != 0], na.rm = TRUE)
   }  
   
   if (weights == "xy"){
     output <- kronecker(x, t(y))
-    if(min(output, na.rm = TRUE) > 1L) output <- output/min(output, na.rm = TRUE)
+    if(min(output[output != 0], na.rm = TRUE) > 1L) 
+      output[output != 0] <- output[output != 0]/min(output[output != 0], na.rm = TRUE)
   }
   
   if (weights == "constant")
@@ -201,21 +203,24 @@ calcular_weights_string <- function(x, y, P0, weights){
     min.v <- min(nrow(P0), length(x))
     output <- P0[1:min.v, ]*x[1:min.v]
     # output[output == 0] <- Inf
-    if(min(output, na.rm = TRUE) > 1L) output <- output/min(output, na.rm = TRUE)
+    if(min(output[output != 0], na.rm = TRUE) > 1L) 
+      output[output != 0] <- output[output != 0]/min(output[output != 0], na.rm = TRUE)
   }
   
   if (weights == "counts"){
     if (min(P0, na.rm = TRUE) < 0L)
       stop("Negative values in 'apriori' are not allowed")
     output <- P0 + .5
-    if(min(output, na.rm = TRUE) > 1L) output <- output/min(output, na.rm = TRUE)
+    if(min(output[output != 0], na.rm = TRUE) > 1L) 
+      output[output != 0] <- output[output != 0]/min(output[output != 0], na.rm = TRUE)
   }
   
   if (weights == "sqrt"){
     if (min(P0, na.rm = TRUE) < 0L)
       stop("Negative values in 'apriori' are not allowed")
     output <- sqrt(P0 + .5)
-    if(min(output, na.rm = TRUE) > 1L) output <- output/min(output, na.rm = TRUE)
+    if(min(output[output != 0], na.rm = TRUE) > 1L) 
+      output[output != 0] <- output[output != 0]/min(output[output != 0], na.rm = TRUE)
   }
   
   if (weights == "sd"){
@@ -225,7 +230,8 @@ calcular_weights_string <- function(x, y, P0, weights){
     output <- sqrt((P0 + .5)/(P0t*(1L-P0t)))
     output[P0t > 0.999 & !is.na(P0t)] <- sqrt((P0[P0t > 0.999 & !is.na(P0t)] + .5)/(0.995*(1L - 0.995)))
     output[is.infinite(output)] <- sqrt(2)               
-    if(min(output, na.rm = TRUE) > 1L) output <- output/min(output, na.rm = T)
+    if(min(output[output != 0], na.rm = TRUE) > 1L) 
+      output[output != 0] <- output[output != 0]/min(output[output != 0], na.rm = TRUE)
   }
   output0 <- matrix(NA, length(x), length(y))
   output0[1:nrow(output), 1:ncol(output)] <- output
@@ -1003,6 +1009,44 @@ lp_apriori_semifull <- function(x, y, P0, weights, uniform = TRUE, solver = "lp_
   
   mt <- lp_apriori_raw2(x = x, y = y, P0 = P0, weights = weights, 
                             uniform = uniform, solver = solver)
+  
+  for (j in 1L:J){
+    if(x[j] == 0L) mt[j, ] <- 0L
+  }
+  for (k in 1L:K){
+    if(y[k] == 0L) mt[, k] <- 0L
+  }
+  
+  VTM <- round(mt*100, 2)
+  
+  output <- list("VTM" = VTM, "VTM.complete" = mt, "weights" = weights)
+  
+  return(output)
+}
+
+
+## Function lp_apriori_fullreverse, for fullreverse scenarios 
+lp_apriori_fullreverse <- function(x, y, P0, weights, uniform = TRUE, solver = "lp_solve", ...){
+  J <- length(x)
+  K <- length(y)
+  JK <- J*K
+  
+  if(K > ncol(P0)){
+    P0 <- cbind(P0, rep(NA, nrow(P0)))
+  }
+  if(J > nrow(P0)){
+    P0 <- rbind(P0, rep(NA, ncol(P0)))
+  }
+  
+  if (is.matrix(weights)){
+    if(nrow(P0) < nrow(weights)) weights <- weights[-nrow(weights), ]
+    if(ncol(P0) < ncol(weights)) weights <- weights[, -ncol(weights)]
+    if(nrow(P0) > nrow(weights)) weights <- rbind(weights, rep(NA, ncol(weights)))
+    if(ncol(P0) > ncol(weights)) weights <- cbind(weights, rep(NA, nrow(weights)))
+  }
+  
+  mt <- lp_apriori_ordinary2(x = x, y = y, P0 = P0, weights = weights, 
+                             uniform = uniform, solver = solver)
   
   for (j in 1L:J){
     if(x[j] == 0L) mt[j, ] <- 0L

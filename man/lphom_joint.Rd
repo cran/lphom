@@ -23,7 +23,7 @@ territorial units considered.  The sum by rows of \code{votes_election1} and
 \item{votes_election2}{data.frame (or matrix) of order IxK with the counts to be initially mapped
 to columns. When estimating vote transfer matrices, the votes gained by
 the \emph{K} political options competing on election 2 (or destination) in the \emph{I}
-territorial units considered. In general, The sum by rows of \code{votes_election1} and
+territorial units considered. The sum by rows of \code{votes_election1} and
 \code{votes_election2} must coincide.}
 
 \item{integers}{A TRUE/FALSE value that indicates whether the LP solution of counts (votes) must be approximate
@@ -48,6 +48,7 @@ A list with the following components
 \item{VTM21}{ The matrix of order KxJ with the estimated row-standardized proportions of vote transitions from election 2 to election 1 associated to the \code{VTM.votes} solution.}
 \item{EHet12}{ A matrix of order IxK measuring in each unit a distance to the homogeneity hypothesis. That is, the differences under the homogeneity hypothesis between the actual recorded results and the expected results in each territorial unit for each option of election two. The matrix Eik.}
 \item{EHet21}{ A matrix of order IxJ measuring in each unit a distance to the homogeneity hypothesis. That is, the differences under the homogeneity hypothesis between the actual recorded results and the expected results in each territorial unit for each option of election one. The matrix Eij.}
+\item{deterministic.bounds}{ A list of two matrices of order JxK containing for each vote transition the lower and upper proportions allowed given the observed aggregates.}
 \item{inputs}{ A list containing all the objects with the values used as arguments by the function.}
 }
 \description{
@@ -62,7 +63,7 @@ mt$VTM.votes
 mt$HETe
 }
 \references{
-Pavia, JM and Romero, R (2021). Symmetry estimating RxC vote transfer matrices from aggregate data, mimeo.
+Pavia, JM and Romero, R (2024). Symmetry estimating RxC vote transfer matrices from aggregate data. \emph{Journal of the Royal Statistical Society, Series A – Statistics in Society}, forthcoming.  \doi{10.1093/jrsssa/qnae013}
 }
 \seealso{
 \code{\link{lphom}} \code{\link{lphom_dual}} \code{\link{tslphom_dual}} \code{\link{nslphom_dual}} \code{\link{tslphom_joint}} \code{\link{nslphom_joint}}
@@ -75,6 +76,7 @@ Other linear programing ecological inference functions:
 \code{\link{nslphom_dual}()},
 \code{\link{nslphom_joint}()},
 \code{\link{nslphom}()},
+\code{\link{rslphom}()},
 \code{\link{tslphom_dual}()},
 \code{\link{tslphom_joint}()},
 \code{\link{tslphom}()}

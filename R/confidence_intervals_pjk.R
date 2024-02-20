@@ -21,8 +21,6 @@
 
 #' @export
 #'
-#' @seealso \code{\link{lphom}} \code{\link{error_lphom}}
-#'
 #' @examples
 #' # Do not run
 #' # mt.lphom <- lphom(France2017P[, 1:8], France2017P[, 9:12], "raw", NULL, FALSE)
@@ -68,9 +66,11 @@ confidence_intervals_pjk <- function(lphom.object,
         sesgos <- simular_errores_estimacion_pjk(escenarios, j, k)
         ses.var <- modelos_ajuste_estimacion_pjk(sesgos, lphom.object$HETe)
         li <- ses.var[1L] + zeta*ses.var[2L]
-        MT.upper[j,k] <- max(min(1L, lphom.object$VTM.complete[j,k] - li), lphom.object$VTM.complete[j,k])
+        MT.upper[j,k] <- max(min(lphom.object$deterministic.bounds$upper[j,k], lphom.object$VTM.complete[j,k] - li), 
+                             lphom.object$VTM.complete[j,k])
         ls <- ses.var[1L] - zeta*ses.var[2L]
-        MT.lower[j,k] <- min(max(0L, lphom.object$VTM.complete[j,k] - ls), lphom.object$VTM.complete[j,k])
+        MT.lower[j,k] <- min(max(lphom.object$deterministic.bounds$lower[j,k], lphom.object$VTM.complete[j,k] - ls), 
+                             lphom.object$VTM.complete[j,k])
       }
     }
   }

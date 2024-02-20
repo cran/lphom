@@ -24,11 +24,11 @@
 )
 }
 \arguments{
-\item{x}{An object output of a \strong{lphom} family algorithm.}
+\item{x}{An object output of a \code{lphom}  family algorithm.}
 
-\item{complete}{A TRUE/FALSE argument informing if the complete matrix should be displayed. In \code{regular} and \code{raw} scenarios this matrix includes the row and the column corresponding to net_entries and net_exits even when they are really small, less than 1\% in all units. Default, FALSE}
+\item{complete}{A \code{TRUE/FALSE} argument informing if the complete matrix should be displayed. In \code{raw}, \code{regular}, \code{ordinary} and \code{enriched} scenarios the plot includes the row and the column corresponding to net_entries and net_exits even when they are really small, less than 1\% in all units. Default, \code{FALSE}.}
 
-\item{margins}{A TRUE/FALSE argument informing if the margins of the matrix should be displayed. Default TRUE.}
+\item{margins}{A \verb{TRUE/FALSE`` argument informing if the margins of the matrix should be displayed. Default }TRUE`.}
 
 \item{digits}{Integer indicating the number of decimal places to be shown. Default, 2.}
 
@@ -48,13 +48,13 @@
 
 \item{alpha}{A [0,1] number of colour transparency.}
 
-\item{which}{A vector of integers informing the units for which the aggregate transfer matrix should be plotted. Default, NULL, the global matrix is shown.}
+\item{which}{A vector of integers informing the units for which the aggregate transfer matrix should be plotted. Default, \code{NULL}, the global matrix is shown.}
 
 \item{...}{Other arguments passed on to methods. Not currently used.}
 
 \item{type}{A character string indicating the solution (transfer matrix) to be plotted. Only valid for \strong{_dual} algorithms. \code{type = "w"} stands for the weighted solution and \code{type = "a"} for the simple average solution. Default \code{w}.}
 
-\item{show.plot}{A TRUE/FALSE indicating if the plot should be displayed as a side-effect. By default, TRUE.}
+\item{show.plot}{A \code{TRUE/FALSE} argument indicating if the plot should be displayed as a side-effect. By default, \code{TRUE}.}
 }
 \value{
 Invisibly returns the (ggplot) description of the plot, which is a list with components that contain the plot itself, the data, information about the scales, panels etc.

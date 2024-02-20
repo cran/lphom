@@ -26,7 +26,7 @@ territorial units considered.  The sum by rows of \code{votes_election1} and
 \item{votes_election2}{data.frame (or matrix) of order IxK with the counts to be initially mapped
 to columns. When estimating vote transfer matrices, the votes gained by
 the \emph{K} political options competing on election 2 (or destination) in the \emph{I}
-territorial units considered. In general, The sum by rows of \code{votes_election1} and
+territorial units considered. The sum by rows of \code{votes_election1} and
 \code{votes_election2} must coincide.}
 
 \item{iter.max}{Maximum number of iterations to be performed in each dual linear program.
@@ -34,16 +34,16 @@ The process ends independently in each system when either the number of iteratio
 iter.max or when the maximum variation between two consecutive estimates of the
 probability transfer matrix is less than \code{tol}. By default, 10.}
 
-\item{min.first}{A TRUE/FALSE value. If FALSE, the matrix associated with the minimum \code{HETe} after
+\item{min.first}{A \code{TRUE/FALSE} value. If \code{FALSE}, the matrix associated with the minimum \code{HETe} after
 performing \code{iter.max} iterations is taken as solution.
-If TRUE, the associated matrix to the instant in which the first decrease of \code{HETe} occurs
+If \code{TRUE}, the associated matrix to the instant in which the first decrease of \code{HETe} occurs
 is taken as solution. The process stops at that moment. In this last scenario
-(when \code{min.first = TRUE}), \code{iter.max} is is forced to be at least 100. Default, FALSE.}
+(when \code{min.first = TRUE}), \code{iter.max} is is forced to be at least 100. Default, \code{FALSE}.}
 
-\item{integers}{A TRUE/FALSE value that indicates whether the problem is solved in integer values in
+\item{integers}{A \code{TRUE/FALSE} value that indicates whether the problem is solved in integer values in
 each iteration: zero (lphom) and intermediate and final (including unit) solutions.
-If TRUE, the initial LP matrices are approximated in each iteration to the closest integer solution
-solving the corresponding Integer Linear Program. Default, FALSE.}
+If \code{TRUE}, the initial LP matrices are approximated in each iteration to the closest integer solution
+solving the corresponding Integer Linear Program. Default, \code{FALSE}.}
 
 \item{solver}{A character string indicating the linear programming solver to be used, only
 \code{lp_solve} and \code{symphony} are allowed. By default, \code{lp_solve}. The package \code{Rsymphony}
@@ -99,7 +99,7 @@ mt$HETe.w
 
 }
 \references{
-Pavia, JM and Romero, R (2021). Symmetry estimating R×C vote transfer matrices from aggregate data, mimeo.
+Pavia, JM and Romero, R (2024). Symmetry estimating RxC vote transfer matrices from aggregate data. \emph{Journal of the Royal Statistical Society, Series A – Statistics in Society}, forthcoming.  \doi{10.1093/jrsssa/qnae013}
 }
 \seealso{
 \code{\link{nslphom}} \code{\link{lphom_dual}} \code{\link{tslphom_dual}} \code{\link{lphom_joint}} \code{\link{tslphom_joint}} \code{\link{nslphom_joint}}
@@ -112,6 +112,7 @@ Other linear programing ecological inference functions:
 \code{\link{lphom}()},
 \code{\link{nslphom_joint}()},
 \code{\link{nslphom}()},
+\code{\link{rslphom}()},
 \code{\link{tslphom_dual}()},
 \code{\link{tslphom_joint}()},
 \code{\link{tslphom}()}

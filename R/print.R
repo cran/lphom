@@ -4,9 +4,9 @@
 #'
 #' @author Jose M. Pavia, \email{pavia@@uv.es}
 #'
-#' @param x An object output of a **lphom** family algorithm.
+#' @param x An object output of a `lphom` family algorithm.
 #' @param ... Other arguments passed on to methods. Not currently used.
-#' @param margins A TRUE/FALSE argument informing if the margins of the matrix should be displayed. Default TRUE.
+#' @param margins A `TRUE/FALSE` argument informing if the margins of the matrix should be displayed. Default `TRUE`.
 #' @param digits Integer indicating the number of decimal places to be shown. Default, 2.
 #' 
 #'

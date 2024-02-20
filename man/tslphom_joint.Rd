@@ -23,13 +23,13 @@ territorial units considered.  The sum by rows of \code{votes_election1} and
 \item{votes_election2}{data.frame (or matrix) of order IxK with the counts to be initially mapped
 to columns. When estimating vote transfer matrices, the votes gained by
 the \emph{K} political options competing on election 2 (or destination) in the \emph{I}
-territorial units considered. In general, The sum by rows of \code{votes_election1} and
+territorial units considered. The sum by rows of \code{votes_election1} and
 \code{votes_election2} must coincide.}
 
-\item{integers}{A TRUE/FALSE value that indicates whether the problem is solved in integer values
-in both iterations: zero (lphom) and final (including unit) solutions. If TRUE, the LP matrices
+\item{integers}{A \code{TRUE/FALSE} value that indicates whether the problem is solved in integer values
+in both iterations: zero (lphom) and final (including unit) solutions. If \code{TRUE}, the LP matrices
 are approximated to the closest integer solution solving the corresponding Integer Linear Program.
-Default, FALSE.}
+Default, \code{FALSE}.}
 
 \item{solver}{A character string indicating the linear programming solver to be used, only
 \code{lp_solve} and \code{symphony} are allowed. By default, \code{lp_solve}. The package \code{Rsymphony}
@@ -51,6 +51,7 @@ A list with the following components
 \item{VTM.votes.units}{ An array of order JxKxI with the estimated matrix of cross-distributions of votes of elections 1 and 2 attained for each unit after congruently adjusting the \strong{lphom_joint()} initial estimate.}
 \item{EHet12}{ A matrix of order IxK measuring in each unit a distance to the homogeneity hypothesis. That is, the differences under the homogeneity hypothesis between the actual recorded results and the expected results in each territorial unit for each option of election two. The matrix Eik.}
 \item{EHet21}{ A matrix of order IxJ measuring in each unit a distance to the homogeneity hypothesis. That is, the differences under the homogeneity hypothesis between the actual recorded results and the expected results in each territorial unit for each option of election one. The matrix Eij.}
+\item{deterministic.bounds}{ A list of two matrices of order JxK and two arrays of order JxKxI containing for each vote transition the lower and upper allowed proportions given the observed aggregates.}
 \item{inputs}{ A list containing all the objects with the values used as arguments by the function.}
 \item{solution_init}{ A list with the main outputs produced by \strong{lphom_joint()}.}
 }
@@ -66,7 +67,7 @@ mt$VTM.votes
 mt$HETe
 }
 \references{
-Pavia, JM and Romero, R (2021). Symmetry estimating RxC vote transfer matrices from aggregate data, mimeo.
+Pavia, JM and Romero, R (2024). Symmetry estimating RxC vote transfer matrices from aggregate data. \emph{Journal of the Royal Statistical Society, Series A – Statistics in Society}, forthcoming.  \doi{10.1093/jrsssa/qnae013}
 }
 \seealso{
 \code{\link{tslphom}} \code{\link{lphom_dual}} \code{\link{tslphom_dual}} \code{\link{nslphom_dual}} \code{\link{lphom_joint}} \code{\link{nslphom_joint}}
@@ -80,6 +81,7 @@ Other linear programing ecological inference functions:
 \code{\link{nslphom_dual}()},
 \code{\link{nslphom_joint}()},
 \code{\link{nslphom}()},
+\code{\link{rslphom}()},
 \code{\link{tslphom_dual}()},
 \code{\link{tslphom}()}
 }

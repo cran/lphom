@@ -1,55 +1,62 @@
 citHeader("To cite lphom in publications use:")
 
-citEntry(entry = "Article",
-  title        = "Assessing uncertainty of voter transitions estimated from aggregated data. Application to the 2017 French presidential election.",
-  author       = personList(as.person("Rafael Romero"),
-                   as.person("Jose M. Pavía"),
-                   as.person("Jorge Martín"),
-                   as.person("Gerardo Romero")),
+bibentry(bibtype = "Article",
+  title        = "Improving estimates accuracy of voter transitions. Two new algorithms for ecological inference based on linear programming",
+  author       = c(person(given = "Jose M.", family = "Pavía"),
+                   person(given = "Rafael", family = "Romero")
+                  ),
+  journal      = "Sociological Methods & Research",
+  year         = "2022",
+  volume       = " ",
+  number       = " ",
+  pages        = " ",
+  doi          = "10.1177/00491241221092725",
+
+  textVersion  =
+  paste("Pavía, Jose M. and Romero, Rafael (2022). ",
+        "Improving estimates accuracy of voter transitions. Two new algorithms for ecological inference based on linear programming. ",
+        "Sociological Methods & Research, online available. ",
+        "URL = https://doi.org/10.1177/00491241221092725")
+  )
+
+
+bibentry(bibtype = "Article",
+  title        = "Symmetry estimating R×C vote transfer matrices from aggregate data",
+  author       = c(person(given = "Jose M.", family = "Pavía"),
+                   person(given = "Rafael", family = "Romero")
+                  ),
+  journal      = "Journal of the Royal Statistical Society, Series A – Statistics in Society",
+  year         = "2024",
+  volume       = " ",
+  number       = " ",
+  pages        = " ",
+  doi          = "10.1093/jrsssa/qnae013",
+
+  textVersion  =
+  paste("Pavía Jose M. and Romero, Rafael (2024). ",
+        "Symmetry estimating R×C vote transfer matrices from aggregate data. ",
+        "Journal of the Royal Statistical Society, Series A – Statistics in Society, forthcoming.",
+        "URL = https://doi.org/10.1093/jrsssa/qnae013")
+)
+
+bibentry(bibtype = "Article",
+  title        = "Assessing uncertainty of voter transitions estimated from aggregated data. Application to the 2017 French presidential election",
+  author       = c(person(given = "Rafael", family = "Romero"),
+                   person(given = "Jose M.", family = "Pavía"),
+                   person(given = "Jorge", family = "Martín"),
+                   person(given = "Gerardo", family = "Romero")     
+                  ),
   journal      = "Journal of Applied Statistics",
   year         = "2020",
   volume       = "47",
   number       = "13-15",
   pages        = "2711--2736",
-  url          = "https://doi.org/10.1080/02664763.2020.1804842",
+  doi          = "10.1080/02664763.2020.1804842",
 
   textVersion  =
   paste("Romero, R, Pavia, JM, Martin, J and Romero G (2020). ",
         "Assessing uncertainty of voter transitions estimated from aggregated data. Application to the 2017 French presidential election. ",
         "Journal of Applied Statistics, 47(13-15), 2711-2736. ",
-        "URL https://10.1080/02664763.2020.1804842")
+        "URL = https://10.1080/02664763.2020.1804842")
 )
 
-citEntry(entry = "Article",
-  title        = "Improving estimates accuracy of voter transitions. Two new algorithms for ecological inference based on linear programming.",
-  author       = personList(as.person("Jose M. Pavía"),
-                   as.person("Rafael Romero")),
-  journal      = "Advance. Preprint",
-  year         = "2021",
-  volume       = " ",
-  number       = " ",
-  pages        = " ",
-  url          = "https://doi.org/10.31124/advance.14716638.v1",
-
-  textVersion  =
-  paste("Jose M. Pavía, Rafael Romero (2021). ",
-        "Improving estimates accuracy of voter transitions. Two new algorithms for ecological inference based on linear programming. ",
-        "URL https://doi.org/10.31124/advance.14716638.v1")
-)
-
-citEntry(entry = "Article",
-  title        = "Symmetry estimating R×C vote transfer matrices from aggregate data.",
-  author       = personList(as.person("Jose M. Pavía"),
-                   as.person("Rafael Romero")),
-  journal      = "Unpublished paper",
-  year         = "2021",
-  volume       = " ",
-  number       = " ",
-  pages        = " ",
-  url          = " ",
-
-  textVersion  =
-  paste("Jose M. Pavía, Rafael Romero (2021). ",
-        "Symmetry estimating R×C vote transfer matrices from aggregate data, ",
-        "mimeo.")
-)

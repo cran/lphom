@@ -4,11 +4,11 @@
 #'
 #' @author Jose M. Pavia, \email{pavia@@uv.es}
 #'
-#' @param object An object output of a **lphom** family algorithm.
+#' @param object An object output of a `lphom` family algorithm.
 #' @param ... Other arguments passed on to methods. Not currently used.
 #' 
 #' @return
-#' An object of class `"summary_lphom"`. 
+#' An object of class `"summary.lphom"`. 
 #' 
 #'
 #' @export

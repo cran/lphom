@@ -31,7 +31,8 @@
 #' @seealso \code{\link{lphom}} \code{\link{confidence_intervals_pjk}}
 #'
 #' @examples
-#' mt.lphom <- lphom(France2017P[, 1:8], France2017P[, 9:12], "raw", NULL, FALSE)
+#' mt.lphom <- lphom(France2017P[, 1:8], France2017P[, 9:12], 
+#'                   new_and_exit_voters = "raw", verbose = FALSE)
 #' set.seed(253443)
 #' example <- error_lphom(mt.lphom, upper.alfa = 0.10, show.plot = FALSE, num.d = 5, B = 8)
 #' example$EI.estimate

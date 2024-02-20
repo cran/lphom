@@ -4,7 +4,7 @@
 #'
 #' @author Jose M. Pavia, \email{pavia@@uv.es}
 #' @author Rafael Romero \email{rromero@@eio.upv.es}
-#' @references Pavia, JM and Romero, R (2021). Symmetry estimating R×C vote transfer matrices from aggregate data, mimeo.
+#' @references Pavia, JM and Romero, R (2024). Symmetry estimating RxC vote transfer matrices from aggregate data. *Journal of the Royal Statistical Society, Series A – Statistics in Society*, forthcoming.  \doi{10.1093/jrsssa/qnae013}
 #'
 #' @param votes_election1 data.frame (or matrix) of order IxJ with the counts to be initially
 #'                        mapped to rows. When estimating vote transfer matrices, the votes gained by 
@@ -15,7 +15,7 @@
 #' @param votes_election2 data.frame (or matrix) of order IxK with the counts to be initially mapped 
 #'                        to columns. When estimating vote transfer matrices, the votes gained by
 #'                        the *K* political options competing on election 2 (or destination) in the *I* 
-#'                        territorial units considered. In general, The sum by rows of `votes_election1` and
+#'                        territorial units considered. The sum by rows of `votes_election1` and
 #'                        `votes_election2` must coincide.
 #'
 #' @param iter.max Maximum number of iterations to be performed in each dual linear program.
@@ -23,16 +23,16 @@
 #'                 iter.max or when the maximum variation between two consecutive estimates of the
 #'                 probability transfer matrix is less than `tol`. By default, 10.
 #'
-#' @param min.first A TRUE/FALSE value. If FALSE, the matrix associated with the minimum `HETe` after
+#' @param min.first A `TRUE/FALSE` value. If `FALSE`, the matrix associated with the minimum `HETe` after
 #'                  performing `iter.max` iterations is taken as solution.
-#'                  If TRUE, the associated matrix to the instant in which the first decrease of `HETe` occurs
+#'                  If `TRUE`, the associated matrix to the instant in which the first decrease of `HETe` occurs
 #'                  is taken as solution. The process stops at that moment. In this last scenario
-#'                  (when `min.first = TRUE`), `iter.max` is is forced to be at least 100. Default, FALSE.
+#'                  (when `min.first = TRUE`), `iter.max` is is forced to be at least 100. Default, `FALSE`.
 #'
-#' @param integers A TRUE/FALSE value that indicates whether the problem is solved in integer values in
+#' @param integers A `TRUE/FALSE` value that indicates whether the problem is solved in integer values in
 #'                 each iteration: zero (lphom) and intermediate and final (including unit) solutions.
-#'                 If TRUE, the initial LP matrices are approximated in each iteration to the closest integer solution
-#'                 solving the corresponding Integer Linear Program. Default, FALSE.
+#'                 If `TRUE`, the initial LP matrices are approximated in each iteration to the closest integer solution
+#'                 solving the corresponding Integer Linear Program. Default, `FALSE`.
 #'
 #' @param solver A character string indicating the linear programming solver to be used, only
 #'               `lp_solve` and `symphony` are allowed. By default, `lp_solve`. The package `Rsymphony`

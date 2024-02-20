@@ -4,7 +4,7 @@
 #'
 #' @author Jose M. Pavia, \email{pavia@@uv.es}
 #' @author Rafael Romero \email{rromero@@eio.upv.es}
-#' @references Pavia, JM and Romero, R (2021). Symmetry estimating RxC vote transfer matrices from aggregate data, mimeo.
+#' @references Pavia, JM and Romero, R (2024). Symmetry estimating RxC vote transfer matrices from aggregate data. *Journal of the Royal Statistical Society, Series A – Statistics in Society*, forthcoming.  \doi{10.1093/jrsssa/qnae013}
 #'
 #' @param votes_election1 data.frame (or matrix) of order IxJ with the counts to be initially
 #'                        mapped to rows. When estimating vote transfer matrices, the votes gained by 
@@ -15,7 +15,7 @@
 #' @param votes_election2 data.frame (or matrix) of order IxK with the counts to be initially mapped 
 #'                        to columns. When estimating vote transfer matrices, the votes gained by
 #'                        the *K* political options competing on election 2 (or destination) in the *I* 
-#'                        territorial units considered. In general, The sum by rows of `votes_election1` and
+#'                        territorial units considered. The sum by rows of `votes_election1` and
 #'                        `votes_election2` must coincide.
 #'
 #' @param integers A TRUE/FALSE value that indicates whether the LP solution of counts (votes) must be approximate
@@ -41,6 +41,7 @@
 #'    \item{VTM21}{ The matrix of order KxJ with the estimated row-standardized proportions of vote transitions from election 2 to election 1 associated to the `VTM.votes` solution.}
 #'    \item{EHet12}{ A matrix of order IxK measuring in each unit a distance to the homogeneity hypothesis. That is, the differences under the homogeneity hypothesis between the actual recorded results and the expected results in each territorial unit for each option of election two. The matrix Eik.}
 #'    \item{EHet21}{ A matrix of order IxJ measuring in each unit a distance to the homogeneity hypothesis. That is, the differences under the homogeneity hypothesis between the actual recorded results and the expected results in each territorial unit for each option of election one. The matrix Eij.}
+#'    \item{deterministic.bounds}{ A list of two matrices of order JxK containing for each vote transition the lower and upper proportions allowed given the observed aggregates.}
 #'    \item{inputs}{ A list containing all the objects with the values used as arguments by the function.}
 #' @export
 #'
@@ -145,10 +146,13 @@ lphom_joint <- function(votes_election1,
  # rownames(eij) <- rownames(votes_election1)
 
   HETe <- 50*(sum(abs(eik)) + sum(abs(eij)))/sum(VTM.votos)
-
+  
+  det.bounds <- bounds_compound(origin = votes_election1, 
+                                destination = votes_election2, zeros = NULL)[c(1,2)]
 
   output <- list("VTM.votes" = VTM.votos, "HETe" = HETe, "VTM12" = VTM1, "VTM21" = VTM2,
-              "EHet.12" = eik, "EHet.21" = eij, "inputs" = inputs)
+                 "EHet.12" = eik, "EHet.21" = eij, "deterministic.bounds" = det.bounds, 
+                 "inputs" = inputs)
   class(output) <- c("lphom_joint", "ei_joint", "lphom")
   return(output)
 }
