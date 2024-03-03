@@ -60,7 +60,7 @@ adjust2integers_default <- function(x, solver = "symphony", ...){
 adjust2integers_lphom <- function(x, solver = "symphony", ...){
   y <- x
   
-  if (y$inputs$solver == "lp_solve"){
+  if (solver == "lp_solve"){
     dec2counts <- dec2counts_lp
   } else {
     dec2counts <- dec2counts_symphony
@@ -108,10 +108,10 @@ adjust2integers_lphom <- function(x, solver = "symphony", ...){
 
 adjust2integers_ei_lp <- function(x, solver = "symphony", ...){
   if (class(x)[1] == "lphom"){
-    adjust2integers_lphom(x = x, solver = solver, ...)
+    y <- adjust2integers_lphom(x = x, solver = solver, ...)
   } else {
     y <- x
-    if (y$inputs$solver == "lp_solve"){
+    if (solver == "lp_solve"){
       dec2counts <- dec2counts_lp
     } else {
       dec2counts <- dec2counts_symphony
@@ -142,7 +142,7 @@ adjust2integers_ei_lp <- function(x, solver = "symphony", ...){
 
 adjust2integers_lphom_dual <- function(x, solver = "symphony", ...){
   y <- x
-  if (y$inputs$solver == "lp_solve"){
+  if (solver == "lp_solve"){
     dec2counts <- dec2counts_lp
   } else {
     dec2counts <- dec2counts_symphony
@@ -174,7 +174,7 @@ adjust2integers_ei_dual <- function(x, solver = "symphony", ...){
     adjust2integers_lphom_dual(x = x, solver= solver, ...)
   } else {
     y <- x
-    if (y$inputs$solver == "lp_solve"){
+    if (solver == "lp_solve"){
       dec2counts <- dec2counts_lp
     } else {
       dec2counts <- dec2counts_symphony
@@ -209,7 +209,7 @@ adjust2integers_ei_dual <- function(x, solver = "symphony", ...){
 
 adjust2integers_lphom_joint <- function(x, solver = "symphony", ...){
   y <- x
-  if (y$inputs$solver == "lp_solve"){
+  if (solver == "lp_solve"){
     dec2counts <- dec2counts_lp
   } else {
     dec2counts <- dec2counts_symphony
@@ -235,7 +235,7 @@ adjust2integers_ei_joint <- function(x, solver = "symphony", ...){
   } else {
     # invisible(validObject(x))
     y <- x
-    if (y$inputs$solver == "lp_solve"){
+    if (solver == "lp_solve"){
       dec2counts <- dec2counts_lp
     } else {
       dec2counts <- dec2counts_symphony

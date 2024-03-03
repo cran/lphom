@@ -210,7 +210,8 @@ plot_ei_dual <- function(x,
     stop("Improper type argument, only 'w' and 'a' are allowed")
   }
   class(x)[2] <- "ei_lp"
-  p <- plot_ei_lp(x = x, 
+  p <- plot_ei_lp(x = x,
+                  complete = TRUE,
                   margins = margins,
                   digits = digits,
                   row.names = row.names,

@@ -119,7 +119,9 @@ options of election 1. When both net entries and exits are no null, constraints
 (13) and (15) of Pavia (2023) apply. If \code{uniform = TRUE} and there are net exits either
 constraints (8) or (11) of Pavia (2023), depending on whether there are or not net
 entries, are also imposed. In this scenario, J could be equal to J1 or J1 + 1 and
-K equal to K2 or K2 + 1.
+K equal to K2 or K2 + 1. Note that this scenario could be also used if
+column J1 of \code{votes_election1} would correspond to immigrants instead of
+new young electors.
 \item \code{ordinary}: This value accounts for a scenario
 with two elections elapsed at least some months where (i) the column K1
 of \code{votes_election2} corresponds to electors who died in the period between
@@ -130,6 +132,8 @@ When both net entries and exits are no null, constraints (14) and
 (15) of Pavia (2023) apply and if \code{uniform = TRUE} either constraints
 (8) and (9) or, without net entries, (6) and (7) of Pavia (2023) are also imposed.
 In this scenario, J could be equal to J1 or J1 + 1 and K equal to K2 or K2 + 1.
+Note that this scenario could be also used if column K1 of
+\code{votes_election2} would correspond to emigrants instead of deaths.
 \item \code{enriched}: This value accounts for a scenario that somehow combine \code{regular} and
 \code{ordinary} scenarios. We consider two elections elapsed at least some months where
 (i) the column J1 of \code{votes_election1} corresponds to new young electors
@@ -141,7 +145,10 @@ to equation (7) of Romero et al. (2020), and (iv) we can assume
 When both net entries and exits are no null, constraints (12) to
 (15) of Pavia (2023) apply and if \code{uniform = TRUE} constraints
 (10) and (11) of Pavia (2023) are also imposed. In this scenario, J could be equal
-to J1 or J1 + 1 and K equal to K2 or K2 + 1.
+to J1 or J1 + 1 and K equal to K2 or K2 + 1. Note that this scenario could be also used if
+the column J1 of \code{votes_election1} would correspond to immigrants instead of
+new young electors and/or if column K1 of \code{votes_election2} would correspond
+to emigrants instead of deaths.
 \item \code{adjust1}: This value accounts for a scenario
 with two elections elapsed at least some months where the census in
 each of the I polling units of the first election (the row-sums of \code{votes_election1}) are

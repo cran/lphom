@@ -1326,7 +1326,7 @@ dec2counts_symphony<-function(matriz, vector.fila, vector.columna){
   output <-matrix(Rsymphony::Rsymphony_solve_LP(obj = objetivo,
                                                 mat = R,
                                                 dir = direc,
-                                                rhs= c0,
+                                                rhs = c0,
                                                 types = tipos,
                                                 time_limit = 10)$solution[indices],
                   length(vector.fila),
@@ -1336,7 +1336,7 @@ dec2counts_symphony<-function(matriz, vector.fila, vector.columna){
 
 # La funcion dec2counts encuentra la matriz con entradas enteras más próxima de una
 # matriz de transferencia con entradas decimales, utilizando lpSolve.
-dec2counts_lp<-function(matriz, vector.fila, vector.columna){
+dec2counts_lp_basic <- function(matriz, vector.fila, vector.columna){
   #
   # aprox.entera(matriz,vector.columna,vector.fila)
   #
@@ -1357,6 +1357,7 @@ dec2counts_lp<-function(matriz, vector.fila, vector.columna){
   #       de suma de filas y columnas.
   #
   
+  # setTimeLimit(5)
   # funcion objetivo
   objetivo<-rep(c(1L, 1L, 0L),length(vector.fila)*length(vector.columna))
   
@@ -1388,14 +1389,24 @@ dec2counts_lp<-function(matriz, vector.fila, vector.columna){
                                       R, 
                                       direc, 
                                       c0,
-                                      int.vec = indices))
-
+                                      int.vec = indices,
+                                      timeout = 5L))
+  
   output <-matrix(nsol$solution[indices],
                   length(vector.fila),
                   length(vector.columna), TRUE)
+  
+  # setTimeLimit(Inf)
   return(output)
 }
 
+dec2counts_lp <- function(matriz, vector.fila, vector.columna){
+  sol <- dec2counts_lp_basic(matriz, vector.fila, vector.columna)
+  if(sum(sol == 0L))
+    sol  <- dec2counts_lp_basic(round(matriz), vector.fila, vector.columna)
+  return(sol)
+}
+  
 
 # La funcion model_LP calcula todos los elementos (matrices y vectores) que definen
 # el programa lineal basico asociado a lphom, bajo supuesto de elecciones simultaneas.

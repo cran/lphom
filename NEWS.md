@@ -1,3 +1,11 @@
+### Package changes from previous lphom version 0.3.5-4
+
+Compared to version 0.3.5-4 of lphom, the new version:
+
+* solves a bug in the `adjust2integers()` function. In the previous version, instead of applying the `solver` argument declared in the function, it incorrectly used the `solver` argument declared when creating the `x` object. It has also bounded the computational time required with argument `solver = "lp_solve"` when performing integer linear programming. Now lphom requires package `lpSolve` (>= 5.6.18).
+* solves a bug in the `plot.lphom()` method. In the previous version, it produced  an error when trying to plot an object generated with `_dual` functions.
+* reviews documentation and updates references.
+
 ### Package changes from previous lphom version 0.3.1-1
 
 Compared to version 0.3.1-1 of lphom, the new version:
