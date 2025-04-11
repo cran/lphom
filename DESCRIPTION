@@ -1,7 +1,7 @@
 Package: lphom
 Type: Package
 Title: Ecological Inference by Linear Programming under Homogeneity
-Version: 0.3.5-5
+Version: 0.3.5-6
 Authors@R: 
     c(person(given = "Jose M.",
            family = "Pavía",
@@ -16,14 +16,15 @@ Description: Provides a bunch of algorithms based on linear programming for esti
     the homogeneity hypothesis, RxC ecological contingency tables (or vote transition matrices) 
     using mainly aggregate data (from voting units). 
     References: 
-    Pavía and Romero (2022) <doi:10.1177/00491241221092725>.
-    Pavía (2023) <doi:10.1007/s43545-023-00658-y>.
+    Pavía and Romero (2024) <doi:10.1177/00491241221092725>.
     Pavía and Romero (2024) <doi:10.1093/jrsssa/qnae013>.
-    Pavía (2024) A local convergent ecological inference algorithm for RxC tables.
+    Pavía (2023) <doi:10.1007/s43545-023-00658-y>.
+    Pavía (2024) <doi:10.1080/0022250X.2024.2423943>.
+    Pavía (2024) <doi:10.1177/07591063241277064>.
     Pavía and Penadés (2024). A bottom-up approach for ecological inference.
     Romero, Pavía, Martín and Romero (2020) <doi:10.1080/02664763.2020.1804842>.
     Acknowledgements:
-    The authors wish to thank Consellería de Educación, Universidades y Empleo, Generalitat Valenciana (grant AICO/2021/257) and Ministerio de Economía e Innovación (grant PID2021-128228NB-I00) for supporting this research.
+    The authors wish to thank Consellería de Educación, Universidades y Empleo, Generalitat Valenciana (grants AICO/2021/257, CIAICO/2023/031) and Ministerio de Economía e Innovación (grant PID2021-128228NB-I00) for supporting this research.
 License: EPL | file LICENSE
 Encoding: UTF-8
 Imports: stats, lpSolve (>= 5.6.18)
@@ -32,9 +33,9 @@ Suggests: ggplot2, scales, Rsymphony (>= 0.1-30)
 LazyData: true
 RoxygenNote: 7.2.3
 NeedsCompilation: no
-Packaged: 2024-03-03 10:12:27 UTC; mariaamparo
+Packaged: 2025-04-11 21:12:04 UTC; mariaamparo
 Author: Jose M. Pavía [aut, cre] (<https://orcid.org/0000-0002-0129-726X>),
   Rafael Romero [aut]
 Maintainer: Jose M. Pavía <jose.m.pavia@uv.es>
 Repository: CRAN
-Date/Publication: 2024-03-03 10:30:02 UTC
+Date/Publication: 2025-04-11 22:00:06 UTC

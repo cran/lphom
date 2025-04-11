@@ -4,7 +4,7 @@
 #'
 #' @author Jose M. Pavia, \email{pavia@@uv.es}
 #' @author Rafael Romero \email{rromero@@eio.upv.es}
-#' @references Pavia, JM and Romero, R (2024). Symmetry estimating RxC vote transfer matrices from aggregate data. *Journal of the Royal Statistical Society, Series A – Statistics in Society*, forthcoming.  \doi{10.1093/jrsssa/qnae013}
+#' @references Pavia, JM and Romero, R (2024). Symmetry estimating RxC vote transfer matrices from aggregate data. *Journal of the Royal Statistical Society, Series A – Statistics in Society*, 187(4), 919-943. \doi{10.1093/jrsssa/qnae013}
 #'
 #' @param votes_election1 data.frame (or matrix) of order IxJ with the counts to be initially
 #'                        mapped to rows. When estimating vote transfer matrices, the votes gained by 

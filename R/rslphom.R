@@ -3,7 +3,7 @@
 #' @description  Estimates RxC (JxK) vote transfer matrices (ecological contingency tables) with rslphom
 #'
 #' @author Jose M. Pavia, \email{pavia@@uv.es}
-#' @references Pavia, JM, and Romero, R (2022). Improving estimates accuracy of voter transitions. Two new algorithms for ecological inference based on linear programming, *Sociological Methods & Research*. \doi{10.1177/00491241221092725}.
+#' @references Pavia, JM, and Romero, R (2024). Improving estimates accuracy of voter transitions. Two new algorithms for ecological inference based on linear programming, *Sociological Methods & Research*, 53(4), 1491–1533. \doi{10.1177/00491241221092725}.
 #' @references Pavia, JM, and Penades, A (2024). A bottom-up approach for ecological inference.
 #'
 #' @param votes_election1 data.frame (or matrix) of order IxJ1 with the votes gained by 

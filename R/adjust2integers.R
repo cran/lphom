@@ -6,7 +6,7 @@
 #' of counts updated to their closest integer matrices. The rest of main components of the object are also accordingly updated.
 #'
 #' @author Jose M. Pavia, \email{pavia@@uv.es}
-#' @references ...
+#' @references Pavia, JM (2024). Integer estimation of inner-cell values in RxC ecological tables. *Bulletin of Sociological Methodology*, 164(1), 97-121. \doi{10.1177/07591063241277064}.
 #'
 #' @param x An object output of a lphom family algorithm
 #' @param solver A character string indicating the linear programming solver to be used to approximate

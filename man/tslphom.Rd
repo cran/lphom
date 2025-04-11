@@ -242,7 +242,9 @@ mt.ts$solution_init$HETe_init
 
 }
 \references{
-Pavia, JM, and Romero, R (2022). Improving estimates accuracy of voter transitions. Two new algorithms for ecological inference based on linear programming, \emph{Sociological Methods & Research}. \doi{10.1177/00491241221092725}.
+Pavia, JM, and Romero, R (2024). Improving estimates accuracy of voter transitions. Two new algorithms for ecological inference based on linear programming, \emph{Sociological Methods & Research}, 53(4), 1491–1533. \doi{10.1177/00491241221092725}.
+
+Pavia, JM (2024). Integer estimation of inner-cell values in RxC ecological tables. \emph{Bulletin of Sociological Methodology}, 164(1), 97-121. \doi{10.1177/07591063241277064}.
 }
 \seealso{
 \code{\link{lphom}} \code{\link{nslphom}} \code{\link{lclphom}} \code{\link{rslphom}}

@@ -4,8 +4,9 @@
 #'
 #' @author Jose M. Pavia, \email{pavia@@uv.es}
 #' @author Rafael Romero \email{rromero@@eio.upv.es}
-#' @references Pavia, JM, and Romero, R (2022). Improving estimates accuracy of voter transitions. Two new algorithms for ecological inference based on linear programming, *Sociological Methods & Research*. \doi{10.1177/00491241221092725}.
-#'
+#' @references Pavia, JM, and Romero, R (2024). Improving estimates accuracy of voter transitions. Two new algorithms for ecological inference based on linear programming, *Sociological Methods & Research*, 53(4), 1491–1533. \doi{10.1177/00491241221092725}.
+#' @references Pavia, JM (2024). Integer estimation of inner-cell values in RxC ecological tables. *Bulletin of Sociological Methodology*, 164(1), 97-121. \doi{10.1177/07591063241277064}.
+#' 
 #' @param votes_election1 data.frame (or matrix) of order IxJ1 with the votes gained by 
 #'                        (or the counts corresponding to) the J1 political options competing
 #'                        (available) on election 1 (or origin) in the I units considered.

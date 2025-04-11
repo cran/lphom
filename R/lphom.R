@@ -5,6 +5,7 @@
 #' @author Jose M. Pavia, \email{pavia@@uv.es}
 #' @author Rafael Romero \email{rromero@@eio.upv.es}
 #' @references Romero, R, Pavia, JM, Martin, J and Romero G (2020). Assessing uncertainty of voter transitions estimated from aggregated data. Application to the 2017 French presidential election. *Journal of Applied Statistics*, 47(13-15), 2711-2736. \doi{10.1080/02664763.2020.1804842}
+#' @references Pavia, JM (2024). Integer estimation of inner-cell values in RxC ecological tables. *Bulletin of Sociological Methodology*, 164(1), 97-121. \doi{10.1177/07591063241277064}.
 #'
 #' @param votes_election1 data.frame (or matrix) of order IxJ1 with the votes gained by 
 #'                        (or the counts corresponding to) the J1 political options competing

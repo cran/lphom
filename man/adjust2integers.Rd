@@ -33,7 +33,7 @@ mt.ts <- tslphom(France2017P[, 1:8] , France2017P[, 9:12], new_and_exit_voters= 
 mt.ts <- adjust2integers(mt.ts, solver = "lp_solve")
 }
 \references{
-...
+Pavia, JM (2024). Integer estimation of inner-cell values in RxC ecological tables. \emph{Bulletin of Sociological Methodology}, 164(1), 97-121. \doi{10.1177/07591063241277064}.
 }
 \author{
 Jose M. Pavia, \email{pavia@uv.es}

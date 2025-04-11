@@ -99,7 +99,7 @@ mt$HETe.w
 
 }
 \references{
-Pavia, JM and Romero, R (2024). Symmetry estimating RxC vote transfer matrices from aggregate data. \emph{Journal of the Royal Statistical Society, Series A – Statistics in Society}, forthcoming.  \doi{10.1093/jrsssa/qnae013}
+Pavia, JM and Romero, R (2024). Symmetry estimating RxC vote transfer matrices from aggregate data. \emph{Journal of the Royal Statistical Society, Series A – Statistics in Society}, 187(4), 919-943. \doi{10.1093/jrsssa/qnae013}
 }
 \seealso{
 \code{\link{nslphom}} \code{\link{lphom_dual}} \code{\link{tslphom_dual}} \code{\link{lphom_joint}} \code{\link{tslphom_joint}} \code{\link{nslphom_joint}}

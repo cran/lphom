@@ -1,3 +1,7 @@
+### Package changes from previous lphom version 0.3.5-5
+
+Compared to version 0.3.5-5 of lphom, the new version includes more actual references.
+
 ### Package changes from previous lphom version 0.3.5-4
 
 Compared to version 0.3.5-4 of lphom, the new version:

@@ -221,6 +221,8 @@ lphom(France2017P[, 1:8] , France2017P[, 9:12], new_and_exit_voters= "raw")
 }
 \references{
 Romero, R, Pavia, JM, Martin, J and Romero G (2020). Assessing uncertainty of voter transitions estimated from aggregated data. Application to the 2017 French presidential election. \emph{Journal of Applied Statistics}, 47(13-15), 2711-2736. \doi{10.1080/02664763.2020.1804842}
+
+Pavia, JM (2024). Integer estimation of inner-cell values in RxC ecological tables. \emph{Bulletin of Sociological Methodology}, 164(1), 97-121. \doi{10.1177/07591063241277064}.
 }
 \seealso{
 \code{\link{tslphom}} \code{\link{nslphom}} \code{\link{lclphom}} \code{\link{rslphom}}
